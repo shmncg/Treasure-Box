@@ -1,0 +1,3237 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>The Treasury Box ｜ 白日夢願景顯像盒</title>
+  <style>
+    /* ==========================================================================
+       CSS RESET & BASE CONFIGURATION
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    :root {
+      --bg-deep: #080a10;
+      --bg-cosmic: #1b263b;
+      --gold-primary: #f9d976;
+      --gold-deep: #e9a838;
+      --gold-accent: #ffec99;
+      --text-gold: linear-gradient(135deg, #fff3c4 0%, #f9d976 50%, #e9a838 100%);
+      --text-muted: #9aa8be;
+      --glass-bg: rgba(22, 31, 49, 0.78);
+      --glass-border: rgba(249, 217, 118, 0.3);
+      --font-serif: "Times New Roman", "Songti TC", "Noto Serif TC", "PMingLiU", serif;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+      --font-mono: "SF Mono", "Courier New", Consolas, monospace;
+    }
+
+    body {
+      background-color: #3b91d8;
+      background-image: 
+        linear-gradient(180deg, rgba(20, 60, 110, 0.32) 0%, rgba(10, 25, 45, 0.2) 65%, rgba(0, 0, 0, 0.45) 100%),
+        url('./bg-pixel.png');
+      background-size: cover;
+      background-position: center bottom;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      image-rendering: pixelated;
+      color: #e5e9f0;
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      position: relative;
+    }
+
+    /* Ambient Floating Sunbeams / Dandelion Dust in Pixel Sky */
+    #ambient-stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.75;
+    }
+
+    /* Mobile Container: Max 420px */
+    .app-viewport {
+      width: 100%;
+      max-width: 420px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+      padding: 24px 18px 36px 18px;
+    }
+
+    /* ==========================================================================
+       HEADER & BRANDING
+       ========================================================================== */
+    .header {
+      text-align: center;
+      margin-bottom: 18px;
+      animation: fadeInDown 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .sub-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 14px;
+      border-radius: 999px;
+      background: rgba(14, 25, 45, 0.78);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(249, 217, 118, 0.45);
+      color: var(--gold-accent);
+      font-size: 11px;
+      font-family: var(--font-mono);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    }
+
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      background-color: var(--gold-primary);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--gold-primary);
+      animation: pulseDot 2s infinite ease-in-out;
+    }
+
+    .main-title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      background: var(--text-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+      text-shadow: 0 3px 0 rgba(8, 20, 42, 0.8), 0 6px 18px rgba(0, 0, 0, 0.5);
+    }
+
+    .main-subtitle {
+      font-size: 13px;
+      color: #f1f5f9;
+      letter-spacing: 0.8px;
+      line-height: 1.5;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8), 0 2px 8px rgba(0, 0, 0, 0.6);
+      font-weight: 500;
+    }
+
+    /* ==========================================================================
+       STAGE 1: 3D TREASURY BOX & INPUT INTERFACE
+       ========================================================================== */
+    .input-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .input-stage.hidden-stage {
+      opacity: 0;
+      transform: translateY(-20px) scale(0.95);
+      pointer-events: none;
+      position: absolute;
+      visibility: hidden;
+    }
+
+    /* ==========================================================================
+       3D TREASURY CHEST ENGINE (SHINY DIVINE FORM & MIMIC MONSTER FORM)
+       ========================================================================== */
+    .chest-stage-wrapper {
+      position: relative;
+      width: 220px;
+      height: 150px;
+      margin: 8px auto 16px auto;
+      perspective: 800px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .chest-glow-halo {
+      position: absolute;
+      bottom: 12px;
+      width: 210px;
+      height: 90px;
+      background: radial-gradient(ellipse, rgba(249, 217, 118, 0.45) 0%, rgba(233, 168, 56, 0.16) 50%, transparent 80%);
+      filter: blur(14px);
+      border-radius: 50%;
+      pointer-events: none;
+      transition: all 0.4s ease;
+      animation: floatAura 3s ease-in-out infinite alternate;
+    }
+
+    /* Ambient Sparkle Glints */
+    .chest-sparkles-container {
+      position: absolute;
+      inset: -15px;
+      pointer-events: none;
+      z-index: 6;
+    }
+
+    .chest-glint {
+      position: absolute;
+      color: #ffd700;
+      font-size: 13px;
+      filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.9));
+      animation: chestGlintPulse 2.2s infinite ease-in-out alternate;
+    }
+
+    .glint-1 { top: 12px; left: 8px; animation-delay: 0s; }
+    .glint-2 { top: 4px; right: 10px; font-size: 16px; animation-delay: 0.7s; color: #fff9c4; }
+    .glint-3 { bottom: 20px; right: 2px; animation-delay: 1.4s; }
+
+    @keyframes chestGlintPulse {
+      0% { opacity: 0.2; transform: scale(0.7) rotate(0deg); }
+      50% { opacity: 1; transform: scale(1.3) rotate(45deg); }
+      100% { opacity: 0.3; transform: scale(0.8) rotate(90deg); }
+    }
+
+    /* Beam shooting out when opened */
+    .quantum-beam {
+      position: absolute;
+      bottom: 45px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 140px;
+      height: 0px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 217, 118, 0.85) 45%, rgba(130, 80, 240, 0.3) 80%, transparent 100%);
+      filter: blur(8px);
+      border-radius: 50% 50% 10px 10px;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 5;
+      transition: height 0.8s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.4s ease;
+    }
+
+    .chest-stage-wrapper.opened .quantum-beam {
+      height: 340px;
+      opacity: 0.95;
+    }
+
+    /* Main Chest 3D Box */
+    .chest {
+      position: relative;
+      width: 194px;
+      height: 126px;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .chest-stage-wrapper:not(.opened) .chest {
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .chest-stage-wrapper:not(.opened):hover .chest:not(.shake-coin):not(.mimic-awaken) {
+      transform: translateY(-3px) scale(1.03);
+    }
+
+    .chest-stage-wrapper:not(.opened):active .chest:not(.shake-coin):not(.mimic-awaken) {
+      transform: translateY(1px) scale(0.97);
+    }
+
+    .chest-stage-wrapper.rumble .chest {
+      animation: chestRumble 0.35s ease-in-out infinite alternate;
+    }
+
+    .chest.shake-coin {
+      animation: chestCoinShake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+
+    @keyframes chestCoinShake {
+      0% { transform: scale(1) rotate(0deg); }
+      15% { transform: scale(1.05, 0.95) translate(-7px, -2px) rotate(-4.5deg); }
+      30% { transform: scale(0.95, 1.05) translate(7px, -4px) rotate(4deg); }
+      45% { transform: scale(1.03, 0.97) translate(-5px, 1px) rotate(-2.5deg); }
+      60% { transform: scale(0.98, 1.02) translate(4px, -1px) rotate(1.8deg); }
+      75% { transform: scale(1.01, 0.99) translate(-2px, 0px) rotate(-0.8deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    .floating-coin {
+      position: absolute;
+      pointer-events: none;
+      font-size: 19px;
+      z-index: 25;
+      user-select: none;
+      filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
+      animation: floatCoinUp 0.75s ease-out forwards;
+    }
+
+    @keyframes floatCoinUp {
+      0% {
+        opacity: 0;
+        transform: translate(0, 0) scale(0.4) rotate(0deg);
+      }
+      20% {
+        opacity: 1;
+        transform: translate(calc(var(--tx) * 0.4), -22px) scale(1.25) rotate(calc(var(--rot) * 0.4));
+      }
+      80% {
+        opacity: 0.95;
+        transform: translate(var(--tx), -48px) scale(1.1) rotate(var(--rot));
+      }
+      100% {
+        opacity: 0;
+        transform: translate(calc(var(--tx) * 1.2), -65px) scale(0.7) rotate(calc(var(--rot) * 1.3));
+      }
+    }
+
+    /* Sweeping Sheen Reflection across the chest */
+    .chest-sheen-sweep {
+      position: absolute;
+      top: -30px;
+      left: -120px;
+      width: 50px;
+      height: 200px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+      transform: rotate(25deg);
+      pointer-events: none;
+      z-index: 5;
+      animation: sheenSweep 4.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    @keyframes sheenSweep {
+      0%, 65% { transform: translateX(0) rotate(25deg); opacity: 0; }
+      70% { opacity: 0.85; }
+      90% { transform: translateX(380px) rotate(25deg); opacity: 0; }
+      100% { transform: translateX(380px) rotate(25deg); opacity: 0; }
+    }
+
+    /* Chest Body */
+    .chest-body {
+      position: absolute;
+      bottom: 0;
+      width: 194px;
+      height: 80px;
+      background: radial-gradient(ellipse at 50% 20%, #202d42 0%, #111a28 60%, #090e17 100%);
+      border: 2.5px solid #d4af37;
+      border-radius: 6px 6px 18px 18px;
+      box-shadow: 
+        0 14px 28px rgba(0, 0, 0, 0.8),
+        inset 0 1px 4px rgba(255, 255, 255, 0.45),
+        inset 0 0 24px rgba(249, 217, 118, 0.22);
+      overflow: hidden;
+      z-index: 2;
+      transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    .chest-body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 18px;
+      right: 18px;
+      height: 100%;
+      border-left: 2px solid rgba(249, 217, 118, 0.4);
+      border-right: 2px solid rgba(249, 217, 118, 0.4);
+      pointer-events: none;
+    }
+
+    /* Golden Corner Brackets with Rivets */
+    .corner-bracket {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border: 2.5px solid #ffd700;
+      pointer-events: none;
+      z-index: 4;
+      transition: border-color 0.35s ease;
+    }
+    .corner-bracket.top-left { top: 2px; left: 2px; border-right: none; border-bottom: none; border-radius: 14px 0 0 0; }
+    .corner-bracket.top-right { top: 2px; right: 2px; border-left: none; border-bottom: none; border-radius: 0 14px 0 0; }
+    .corner-bracket.bottom-left { bottom: 2px; left: 2px; border-right: none; border-top: none; border-radius: 0 0 0 14px; }
+    .corner-bracket.bottom-right { bottom: 2px; right: 2px; border-left: none; border-top: none; border-radius: 0 0 14px 0; }
+
+    .corner-bracket::after {
+      content: "";
+      position: absolute;
+      width: 3.5px;
+      height: 3.5px;
+      background: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 3px #ffd700;
+    }
+    .corner-bracket.top-left::after { top: 2px; left: 2px; }
+    .corner-bracket.top-right::after { top: 2px; right: 2px; }
+    .corner-bracket.bottom-left::after { bottom: 2px; left: 2px; }
+    .corner-bracket.bottom-right::after { bottom: 2px; right: 2px; }
+
+    /* Central Golden Lock Core */
+    .chest-lock {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 34px;
+      background: linear-gradient(135deg, #fff3a8 0%, #ffd700 40%, #ff8c00 100%);
+      border-radius: 6px;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 16px rgba(255, 215, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 4;
+      cursor: pointer;
+      transition: all 0.35s ease;
+    }
+
+    .chest-lock-wings {
+      position: absolute;
+      top: -4px;
+      left: -9px;
+      right: -9px;
+      height: 14px;
+      background: linear-gradient(180deg, #ffe57f 0%, #b8860b 100%);
+      border-radius: 6px;
+      z-index: -1;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+    }
+
+    .chest-lock-gem {
+      width: 12px;
+      height: 12px;
+      background: #0b111e;
+      border-radius: 50%;
+      border: 1.5px solid #fff;
+      box-shadow: inset 0 0 6px #00ffff, 0 0 10px #00ffff;
+      animation: gemBlink 2.5s infinite alternate ease-in-out;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gem-inner-eye {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle, #00ffff 30%, #005577 80%);
+      transition: all 0.3s ease;
+    }
+
+    /* Chest Lid */
+    .chest-lid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 194px;
+      height: 52px;
+      background: radial-gradient(ellipse at 50% 10%, #314463 0%, #1c2a3f 60%, #101927 100%);
+      border: 2.5px solid #d4af37;
+      border-radius: 20px 20px 4px 4px;
+      box-shadow: 
+        0 8px 18px rgba(0, 0, 0, 0.65),
+        inset 0 4px 8px rgba(255, 255, 255, 0.5),
+        inset 0 -2px 6px rgba(0, 0, 0, 0.4);
+      transform-origin: 50% 6px;
+      transition: transform 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.35s ease, border-color 0.35s ease;
+      z-index: 3;
+    }
+
+    .chest-lid-band {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 32px;
+      background: linear-gradient(90deg, #996515 0%, #ffd700 50%, #996515 100%);
+      border-left: 1px solid rgba(0, 0, 0, 0.35);
+      border-right: 1px solid rgba(0, 0, 0, 0.35);
+      box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.4);
+      transition: background 0.35s ease;
+    }
+
+    .chest-lid-crest {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 16px;
+      color: #121927;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+      filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.8));
+    }
+
+    .chest-stage-wrapper.opened .chest-lid {
+      transform: rotateX(-120deg) translateY(-8px) !important;
+      box-shadow: 0 -12px 25px rgba(249, 217, 118, 0.45);
+    }
+
+    .chest-stage-wrapper.opened .chest {
+      transform: scale(1.05) translateY(8px);
+    }
+
+    /* ==========================================================================
+       MIMIC MONSTER CHEST (寶箱怪型態)
+       ========================================================================== */
+    .chest-stage-wrapper.mimic-mode .chest-glow-halo {
+      background: radial-gradient(ellipse, rgba(168, 85, 247, 0.65) 0%, rgba(225, 29, 72, 0.3) 55%, transparent 80%);
+      filter: blur(15px);
+      animation: mimicAuraPulse 1.8s ease-in-out infinite alternate;
+    }
+
+    @keyframes mimicAuraPulse {
+      0% { transform: scale(1); opacity: 0.75; }
+      100% { transform: scale(1.18); opacity: 1; }
+    }
+
+    /* Awakened Jolt Animation */
+    .chest-stage-wrapper.mimic-awaken .chest {
+      animation: mimicAwakenJolt 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+
+    @keyframes mimicAwakenJolt {
+      0% { transform: scale(1) translate(0, 0); }
+      15% { transform: scale(1.08) translate(-6px, -10px) rotate(-4deg); }
+      30% { transform: scale(1.06) translate(6px, -12px) rotate(4deg); }
+      50% { transform: scale(1.04) translate(-4px, -4px) rotate(-2deg); }
+      75% { transform: scale(1.02) translate(3px, -2px) rotate(1deg); }
+      100% { transform: scale(1) translate(0, 0); }
+    }
+
+    /* Mimic Chest Body Texture */
+    .chest-stage-wrapper.mimic-mode .chest-body {
+      background: radial-gradient(ellipse at 50% 20%, #2f1244 0%, #170822 60%, #0d0213 100%);
+      border-color: #c084fc;
+      box-shadow: 
+        0 14px 28px rgba(0, 0, 0, 0.9),
+        inset 0 1px 3px rgba(255, 140, 240, 0.4),
+        inset 0 0 28px rgba(168, 85, 247, 0.4);
+    }
+
+    .chest-stage-wrapper.mimic-mode .corner-bracket {
+      border-color: #ec4899;
+    }
+
+    .chest-stage-wrapper.mimic-mode .corner-bracket::after {
+      background: #f472b6;
+      box-shadow: 0 0 4px #ec4899;
+    }
+
+    /* Mimic Chest Lid Cracked Open */
+    .chest-stage-wrapper.mimic-mode:not(.opened) .chest-lid {
+      background: radial-gradient(ellipse at 50% 10%, #451b61 0%, #240d33 60%, #150520 100%);
+      border-color: #c084fc;
+      transform: rotateX(-22deg) translateY(-8px);
+      box-shadow: 0 6px 20px rgba(168, 85, 247, 0.45);
+    }
+
+    .chest-stage-wrapper.mimic-mode .chest-lid-band {
+      background: linear-gradient(90deg, #701a75 0%, #ec4899 50%, #701a75 100%);
+    }
+
+    /* Mimic Maw Gap inside the crack */
+    .mimic-maw-gap {
+      position: absolute;
+      top: 40px;
+      left: 14px;
+      right: 14px;
+      height: 24px;
+      background: #08020d;
+      border-radius: 4px;
+      z-index: 2;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+    }
+
+    .chest-stage-wrapper.mimic-mode .mimic-maw-gap {
+      opacity: 1;
+    }
+
+    /* Spooky Glowing Mimic Eyes */
+    .mimic-eyes {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      width: 72px;
+      position: absolute;
+      top: 2px;
+      z-index: 3;
+    }
+
+    .mimic-eye {
+      width: 14px;
+      height: 11px;
+      background: radial-gradient(circle, #ffeb3b 40%, #f43f5e 90%);
+      border-radius: 50%;
+      border: 1px solid #fff;
+      box-shadow: 0 0 8px #ffeb3b, 0 0 14px #f43f5e;
+      position: relative;
+      animation: mimicEyeBlink 3s infinite;
+    }
+
+    .mimic-eye .pupil {
+      position: absolute;
+      top: 1.5px;
+      left: 5.5px;
+      width: 2.5px;
+      height: 8px;
+      background: #110204;
+      border-radius: 999px;
+    }
+
+    @keyframes mimicEyeBlink {
+      0%, 94%, 100% { transform: scaleY(1); }
+      96% { transform: scaleY(0.1); }
+    }
+
+    /* Sharp Jagged Fangs */
+    .mimic-teeth-row {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      display: flex;
+      justify-content: space-between;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .upper-teeth {
+      bottom: -11px;
+    }
+
+    .lower-teeth {
+      top: -2px;
+    }
+
+    .chest-stage-wrapper.mimic-mode .mimic-teeth-row {
+      opacity: 1;
+    }
+
+    .fang {
+      width: 0;
+      height: 0;
+      display: inline-block;
+    }
+
+    .upper-teeth .fang {
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 13px solid #fefcf3;
+      filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.9));
+    }
+
+    .lower-teeth .fang {
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 13px solid #fefcf3;
+      filter: drop-shadow(0 -1px 2px rgba(0, 0, 0, 0.9));
+    }
+
+    /* Flopping Monster Tongue */
+    .mimic-tongue {
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 26px;
+      height: 52px;
+      background: linear-gradient(180deg, #be123c 0%, #e11d48 70%, #fb7185 100%);
+      border-radius: 0 0 14px 14px;
+      border: 1.5px solid #881337;
+      border-top: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.65);
+      z-index: 6;
+      opacity: 0;
+      transform-origin: 50% 0%;
+      pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    .chest-stage-wrapper.mimic-mode .mimic-tongue {
+      opacity: 1;
+      animation: tongueWiggle 1.8s ease-in-out infinite;
+    }
+
+    @keyframes tongueWiggle {
+      0%, 100% { transform: translateX(-50%) rotate(0deg); }
+      30% { transform: translateX(-50%) rotate(-7deg) scaleY(1.05); }
+      70% { transform: translateX(-50%) rotate(7deg) scaleY(0.98); }
+    }
+
+    .tongue-tip {
+      position: absolute;
+      bottom: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1px;
+      height: 10px;
+      background: #881337;
+    }
+
+    .saliva-drop {
+      position: absolute;
+      bottom: -6px;
+      left: 15px;
+      width: 5px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.75);
+      border-radius: 50%;
+      filter: blur(0.5px);
+      animation: salivaDrip 1.5s infinite ease-in;
+    }
+
+    @keyframes salivaDrip {
+      0% { opacity: 0; transform: translateY(-4px) scale(0.6); }
+      50% { opacity: 0.9; transform: translateY(0px) scale(1); }
+      100% { opacity: 0; transform: translateY(10px) scale(0.4); }
+    }
+
+    /* Lock Gem in Mimic Mode: Bloodshot Cyclops Eye */
+    .chest-stage-wrapper.mimic-mode .chest-lock {
+      background: linear-gradient(135deg, #a855f7, #6b21a8);
+      border-color: #ec4899;
+      box-shadow: 0 0 16px rgba(236, 72, 153, 0.85);
+    }
+
+    .chest-stage-wrapper.mimic-mode .gem-inner-eye {
+      background: radial-gradient(circle, #e11d48 40%, #4c0519 80%);
+      box-shadow: 0 0 10px #ff0055;
+    }
+
+    /* Particle Emitter Canvas */
+    #particle-canvas {
+      position: absolute;
+      top: -120px;
+      left: -90px;
+      width: 440px;
+      height: 380px;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* Input Card Container */
+    .dream-card-form {
+      width: 100%;
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 22px 18px;
+      box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(249, 217, 118, 0.08);
+      position: relative;
+    }
+
+    .input-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 10px;
+    }
+
+    .input-label {
+      font-size: 13.5px;
+      color: var(--gold-accent);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .char-count {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    .dream-textarea {
+      width: 100%;
+      height: 92px;
+      background: rgba(8, 12, 20, 0.75);
+      border: 1.5px solid rgba(249, 217, 118, 0.25);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #fff;
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.5;
+      resize: none;
+      outline: none;
+      transition: all 0.3s ease;
+      user-select: text;
+    }
+
+    .dream-textarea:focus {
+      border-color: var(--gold-primary);
+      box-shadow: 0 0 16px rgba(249, 217, 118, 0.25);
+      background: rgba(12, 17, 28, 0.88);
+    }
+
+    .dream-textarea::placeholder {
+      color: rgba(154, 168, 190, 0.55);
+      font-size: 13px;
+    }
+
+    /* ==========================================================================
+       OPTION 2: TRUE STEPPER FLOW (STEP 1: FACTION ➡️ STEP 2: WISH)
+       ========================================================================== */
+    .stepper-view {
+      width: 100%;
+    }
+
+    .stepper-view.fade-enter {
+      animation: stepFadeIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes stepFadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .step-badge {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      color: #121008;
+      background: var(--gold-primary);
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.8px;
+      box-shadow: 0 0 8px rgba(249, 217, 118, 0.4);
+    }
+
+    .step-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--gold-accent);
+      letter-spacing: 0.5px;
+    }
+
+    .step-hint {
+      font-size: 11px;
+      color: var(--gold-accent);
+      font-family: var(--font-mono);
+      opacity: 0.85;
+    }
+
+    .back-step-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(249, 217, 118, 0.35);
+      color: var(--gold-accent);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .back-step-btn:active {
+      transform: scale(0.95);
+      background: rgba(249, 217, 118, 0.2);
+    }
+
+    /* 3x3 Faction Selection Grid (Step 1) */
+    .factions-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .faction-card {
+      background: rgba(14, 22, 38, 0.88);
+      border: 1.5px solid rgba(249, 217, 118, 0.24);
+      border-radius: 12px;
+      padding: 12px 6px 10px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      text-align: center;
+      user-select: none;
+    }
+
+    .faction-card:active {
+      transform: scale(0.94);
+      background: rgba(249, 217, 118, 0.2);
+      border-color: var(--gold-primary);
+    }
+
+    .faction-card-icon {
+      font-size: 26px;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .faction-card-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #e2e8f0;
+      line-height: 1.2;
+    }
+
+    .step-footer-prompt {
+      text-align: center;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    /* Selected Faction Banner in Step 2 */
+    .selected-faction-banner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(249, 217, 118, 0.12);
+      border: 1px solid rgba(249, 217, 118, 0.38);
+      border-radius: 10px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+    }
+
+    .banner-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .banner-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .banner-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gold-accent);
+    }
+
+    .banner-pet {
+      font-size: 11px;
+      color: #cbd5e1;
+      font-family: var(--font-mono);
+    }
+
+    .ideas-section {
+      margin-bottom: 10px;
+    }
+
+    .ideas-label {
+      font-size: 11.5px;
+      color: #94a3b8;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Dynamic Inspiration Pills */
+    .dynamic-chips-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .idea-chip {
+      background: rgba(249, 217, 118, 0.08);
+      border: 1px solid rgba(249, 217, 118, 0.3);
+      color: #f1f5f9;
+      font-size: 12px;
+      line-height: 1.4;
+      padding: 7px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-align: left;
+    }
+
+    .idea-chip:active {
+      background: rgba(249, 217, 118, 0.25);
+      border-color: var(--gold-primary);
+      transform: scale(0.98);
+    }
+
+    .idea-chip-prefix {
+      color: var(--gold-primary);
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+
+    .textarea-wrapper {
+      position: relative;
+      margin-bottom: 14px;
+    }
+
+    .textarea-wrapper .char-count {
+      position: absolute;
+      bottom: 8px;
+      right: 12px;
+      font-size: 10.5px;
+      color: #64748b;
+      font-family: var(--font-mono);
+    }
+
+    /* Golden CTA Button */
+    .deposit-btn {
+      width: 100%;
+      margin-top: 18px;
+      height: 52px;
+      background: linear-gradient(135deg, #ffd700 0%, #f39c12 50%, #d35400 100%);
+      border: none;
+      border-radius: 14px;
+      color: #121008;
+      font-weight: 700;
+      font-size: 15.5px;
+      letter-spacing: 1.2px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 
+        0 6px 20px rgba(243, 156, 18, 0.35),
+        0 0 12px rgba(255, 215, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .deposit-btn::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -60%;
+      width: 50%;
+      height: 200%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+      transform: rotate(25deg);
+      animation: btnShimmer 3.2s infinite ease-in-out;
+    }
+
+    .deposit-btn:active {
+      transform: scale(0.97);
+    }
+
+    .deposit-btn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      filter: grayscale(0.5);
+    }
+
+    /* ==========================================================================
+       STAGE 2: POLAROID DREAM SPIRIT CARD (MUSEUM SPECIMEN)
+       ========================================================================== */
+    .result-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      opacity: 0;
+      transform: translateY(40px) scale(0.94);
+      transition: all 0.85s cubic-bezier(0.19, 1, 0.22, 1);
+      pointer-events: none;
+      position: absolute;
+      visibility: hidden;
+    }
+
+    .result-stage.visible-stage {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+      position: relative;
+      visibility: visible;
+    }
+
+    /* Polaroid Fine-Art Museum Card */
+    .polaroid-card {
+      width: 100%;
+      background: #ffffff;
+      color: #1a1a1a;
+      border-radius: 12px;
+      padding: 15px 15px 20px 15px;
+      box-shadow: 
+        0 24px 55px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(255, 255, 255, 0.15),
+        inset 0 0 15px rgba(0, 0, 0, 0.03);
+      position: relative;
+      overflow: hidden;
+      animation: cardFloat 5.5s ease-in-out infinite alternate;
+    }
+
+    /* Vector Slime Frame Window (260px Fixed Height) */
+    .card-photo-wrapper {
+      width: 100%;
+      height: 260px;
+      position: relative;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #0d1322;
+      box-shadow: 
+        inset 0 0 10px rgba(0, 0, 0, 0.4),
+        0 2px 6px rgba(0, 0, 0, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #slime-svg-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .slime-vector-art {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.45));
+      animation: slimeBounce 3.6s ease-in-out infinite alternate;
+      transform-origin: center bottom;
+    }
+
+    /* Archetype Category Floating Chip */
+    .category-floating-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(10, 15, 26, 0.78);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(249, 217, 118, 0.4);
+      color: var(--gold-accent);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      z-index: 2;
+    }
+
+    .slime-pet-name {
+      position: absolute;
+      bottom: 10px;
+      right: 12px;
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 3px 9px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      z-index: 2;
+    }
+
+    /* Card Information Body */
+    .card-meta-content {
+      padding: 16px 4px 4px 4px;
+    }
+
+    .card-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      border-bottom: 1px dashed #d1c7bd;
+      padding-bottom: 8px;
+    }
+
+    .archive-id {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: #936528;
+      letter-spacing: 1.2px;
+    }
+
+    .quantum-tag {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #7d7265;
+      font-family: var(--font-mono);
+      background: #eee8e0;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    /* Student's Original Dream Title */
+    .dream-quote-box {
+      margin-bottom: 14px;
+    }
+
+    .dream-quote-text {
+      font-family: var(--font-serif);
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a1a24;
+      line-height: 1.5;
+      letter-spacing: 0.4px;
+      word-break: break-word;
+      user-select: text;
+    }
+
+    /* Poetic Oracle Verse (籤詩) */
+    .oracle-poem-section {
+      background: #f7f4ee;
+      border-left: 3px solid #b5894b;
+      padding: 11px 14px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 16px;
+    }
+
+    .oracle-title {
+      font-size: 10.5px;
+      font-family: var(--font-mono);
+      color: #8c6d3b;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .oracle-poem-text {
+      font-family: var(--font-serif);
+      font-size: 13.5px;
+      color: #40362c;
+      line-height: 1.6;
+      font-style: italic;
+    }
+
+    /* Card Footer Seals & Metadata */
+    .card-footer-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      font-size: 9.5px;
+      color: #9c9184;
+      font-family: var(--font-mono);
+      letter-spacing: 0.8px;
+    }
+
+    .seal-stamp {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border: 1.5px solid #ab4b38;
+      color: #ab4b38;
+      border-radius: 50%;
+      font-size: 8.5px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.1;
+      transform: rotate(-7deg);
+      opacity: 0.85;
+      box-shadow: 0 0 2px rgba(171, 75, 56, 0.4);
+    }
+
+    /* Bottom Interactive Controls */
+    .result-actions {
+      width: 100%;
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .save-hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .action-btn-row {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .action-btn {
+      flex: 1;
+      height: 48px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-download {
+      background: linear-gradient(135deg, #ffd700 0%, #f39c12 100%);
+      color: #110e05;
+      border: none;
+      box-shadow: 0 4px 14px rgba(243, 156, 18, 0.35);
+    }
+
+    .btn-download:active {
+      transform: scale(0.97);
+    }
+
+    .btn-reset {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(249, 217, 118, 0.3);
+      color: var(--gold-accent);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-reset:active {
+      transform: scale(0.97);
+      background: rgba(249, 217, 118, 0.15);
+    }
+
+    /* ==========================================================================
+       ANIMATIONS
+       ========================================================================== */
+    @keyframes pulseDot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.4; }
+    }
+
+    @keyframes floatAura {
+      0% { transform: scale(0.95); opacity: 0.35; }
+      100% { transform: scale(1.15); opacity: 0.6; }
+    }
+
+    @keyframes gemBlink {
+      0% { filter: brightness(1) drop-shadow(0 0 4px #00ffff); }
+      100% { filter: brightness(1.6) drop-shadow(0 0 10px #7928ca); }
+    }
+
+    @keyframes btnShimmer {
+      0% { left: -60%; }
+      30%, 100% { left: 160%; }
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes cardFloat {
+      0% { transform: translateY(0px) rotate(0deg); }
+      100% { transform: translateY(-5px) rotate(0.3deg); }
+    }
+
+    @keyframes chestRumble {
+      0% { transform: translate(-3px, 1px) rotate(-1.5deg); }
+      50% { transform: translate(3px, -2px) rotate(1.5deg); }
+      100% { transform: translate(-2px, -1px) rotate(-1deg); }
+    }
+
+    @keyframes slimeBounce {
+      0% { transform: translateY(2px) scale(1, 1); }
+      50% { transform: translateY(-6px) scale(0.97, 1.03); }
+      100% { transform: translateY(0px) scale(1.02, 0.98); }
+    }
+
+    /* Toast Notification */
+    .toast-msg {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(50px);
+      background: rgba(18, 25, 44, 0.95);
+      border: 1px solid var(--gold-primary);
+      color: var(--gold-accent);
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .toast-msg.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Twinkling Cosmic Dust Background Canvas -->
+  <canvas id="ambient-stars"></canvas>
+
+  <main class="app-viewport">
+    
+    <!-- Header -->
+    <header class="header">
+      <div class="sub-badge">
+        <span class="pulse-dot"></span>
+        <span>THE TREASURY BOX • MYSTIC ARCHIVES</span>
+      </div>
+      <h1 class="main-title">白日夢願景顯像盒</h1>
+      <p class="main-subtitle">將你的潛意識願景投入寶箱，解鎖專屬心靈幻獸</p>
+    </header>
+
+    <!-- STAGE 1: INPUT & 3D TREASURY CHEST -->
+    <section class="input-stage" id="stage-input">
+      
+      <!-- 3D Mystical Treasury Box (With Shiny & Mimic Monster Forms) -->
+      <div class="chest-stage-wrapper" id="chest-box">
+        <div class="chest-glow-halo" id="chest-halo"></div>
+        <div class="quantum-beam"></div>
+        <canvas id="particle-canvas"></canvas>
+
+        <!-- Ambient Sparkles -->
+        <div class="chest-sparkles-container">
+          <span class="chest-glint glint-1">✦</span>
+          <span class="chest-glint glint-2">★</span>
+          <span class="chest-glint glint-3">✦</span>
+        </div>
+
+        <div class="chest" id="chest-inner">
+          <!-- Metallic Light Sheen Sweep Overlay -->
+          <div class="chest-sheen-sweep"></div>
+
+          <!-- Animated Lid -->
+          <div class="chest-lid">
+            <div class="corner-bracket top-left"></div>
+            <div class="corner-bracket top-right"></div>
+            <div class="chest-lid-band"></div>
+            <div class="chest-lid-crest">✦</div>
+            <!-- Mimic Upper Fangs -->
+            <div class="mimic-teeth-row upper-teeth">
+              <span class="fang"></span><span class="fang"></span><span class="fang"></span><span class="fang"></span><span class="fang"></span><span class="fang"></span><span class="fang"></span>
+            </div>
+          </div>
+
+          <!-- Mimic Maw Gap (Eyes & Tongue inside) -->
+          <div class="mimic-maw-gap">
+            <div class="mimic-eyes">
+              <div class="mimic-eye left-eye"><div class="pupil"></div></div>
+              <div class="mimic-eye right-eye"><div class="pupil"></div></div>
+            </div>
+            <!-- Mimic Flopping Tongue -->
+            <div class="mimic-tongue">
+              <div class="tongue-tip"></div>
+              <div class="saliva-drop"></div>
+            </div>
+          </div>
+
+          <!-- Chest Body -->
+          <div class="chest-body">
+            <div class="corner-bracket bottom-left"></div>
+            <div class="corner-bracket bottom-right"></div>
+            <!-- Mimic Lower Fangs -->
+            <div class="mimic-teeth-row lower-teeth">
+              <span class="fang"></span><span class="fang"></span><span class="fang"></span><span class="fang"></span><span class="fang"></span><span class="fang"></span><span class="fang"></span>
+            </div>
+            <div class="chest-lock" id="chest-lock-btn">
+              <div class="chest-lock-wings"></div>
+              <div class="chest-lock-gem">
+                <div class="gem-inner-eye"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dream Input Form (Option 2: True Stepper Flow) -->
+      <div class="dream-card-form">
+        
+        <!-- STEP 1: FACTION SELECTION VIEW -->
+        <div id="view-step-1" class="stepper-view">
+          <div class="step-header-row">
+            <div class="step-header">
+              <span class="step-badge">STEP 1 / 2</span>
+              <span class="step-title">挑選你的白日夢原型</span>
+            </div>
+            <span class="step-hint">點選直達下一步 ➜</span>
+          </div>
+          <div class="factions-grid" id="factions-grid"></div>
+          <p class="step-footer-prompt">💡 點選任一陣營，立刻解鎖專屬心靈幻獸</p>
+        </div>
+
+        <!-- STEP 2: WISH WRITING & INSPIRATIONS VIEW -->
+        <div id="view-step-2" class="stepper-view" style="display: none;">
+          <div class="step-header-row">
+            <div class="step-header">
+              <span class="step-badge">STEP 2 / 2</span>
+              <span class="step-title">具象化具體心願</span>
+            </div>
+            <button type="button" class="back-step-btn" id="back-to-step1-btn">
+              <span>↺ 重選原型</span>
+            </button>
+          </div>
+
+          <!-- Current Selected Faction Banner -->
+          <div class="selected-faction-banner" id="selected-faction-banner">
+            <span class="banner-icon" id="banner-icon">👑</span>
+            <div class="banner-text">
+              <span class="banner-title" id="banner-title">暴富財富派</span>
+              <span class="banner-pet" id="banner-pet">預定孵化：鎏金暴富招財姆</span>
+            </div>
+          </div>
+
+          <!-- Tailored Inspiration Ideas -->
+          <div class="ideas-section">
+            <div class="ideas-label">
+              <span>💡</span> 點擊任一靈感帶入，亦可自由修改：
+            </div>
+            <div class="dynamic-chips-row" id="dynamic-chips-container"></div>
+          </div>
+
+          <div class="textarea-wrapper">
+            <textarea 
+              id="dream-input" 
+              class="dream-textarea" 
+              maxlength="120" 
+              placeholder="寫下你的白日夢..."
+            ></textarea>
+            <span class="char-count" id="char-counter">0 / 120</span>
+          </div>
+
+          <!-- Submit Button -->
+          <button id="deposit-btn" class="deposit-btn">
+            <span>投入寶箱・具象化幻獸 ✨</span>
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- STAGE 2: POLAROID PHOTOGRAPHY CARD RESULT -->
+    <section class="result-stage" id="stage-result">
+      
+      <!-- Polaroid Fine-Art Museum Card -->
+      <article class="polaroid-card" id="polaroid-card-elem">
+        
+        <!-- Vector Slime Frame Window (Fixed 260px Height) -->
+        <div class="card-photo-wrapper">
+          <div class="category-floating-badge" id="card-archetype-badge">
+            <span>✧</span>
+            <span id="card-archetype-name">翡翠薄荷治癒姆</span>
+          </div>
+          <div class="slime-pet-name" id="card-pet-name">HEALING SLIME</div>
+          <div id="slime-svg-container"></div>
+        </div>
+
+        <!-- Meta Information -->
+        <div class="card-meta-content">
+          <div class="card-header-bar">
+            <div class="archive-id" id="card-id-text">ARCHIVE: #HEAL-8201</div>
+            <span class="quantum-tag" id="card-state-tag">SLIME SPIRIT MINTED</span>
+          </div>
+
+          <!-- Original Dream Text -->
+          <div class="dream-quote-box">
+            <p class="dream-quote-text" id="card-quote-text">“ 找回平靜 ”</p>
+          </div>
+
+          <!-- Poetic Dream Oracle (籤詩) -->
+          <div class="oracle-poem-section">
+            <div class="oracle-title">✧ 幻獸籤詩 • SPIRIT ORACLE</div>
+            <p class="oracle-poem-text" id="card-oracle-text"></p>
+          </div>
+
+          <!-- Footer Metadata -->
+          <div class="card-footer-meta">
+            <div>
+              <div>THE TREASURY BOX ARCHIVE</div>
+              <div id="card-timestamp">2026.09.27 // SEED VERIFIED</div>
+            </div>
+            <div class="seal-stamp">
+              SLIME<br/>TREASURY<br/>MINT
+            </div>
+          </div>
+        </div>
+
+      </article>
+
+      <!-- Bottom Interactive Controls -->
+      <div class="result-actions">
+        <p class="save-hint">
+          <span>💡</span> 長按上方卡片可儲存，或點擊下方按鈕珍藏
+        </p>
+        <div class="action-btn-row">
+          <button id="download-btn" class="action-btn btn-download">
+            <span>📥 珍藏幻獸卡片</span>
+          </button>
+          <button id="reset-btn" class="action-btn btn-reset">
+            <span>再做一個夢 ↺</span>
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Interactive Feedback Toast -->
+  <div class="toast-msg" id="toast-msg">專屬幻獸已成功孵化！</div>
+
+  <!-- Offscreen Canvas for High-Resolution Card Export -->
+  <canvas id="export-canvas" style="display:none;"></canvas>
+
+  <script>
+    /* ==========================================================================
+       1. 9 DREAM ARCHETYPES & SLIME CHARACTER SPECIFICATIONS (WITH FACTION DATA)
+       ========================================================================== */
+    const ARCHETYPES = [
+      {
+        id: "wealth",
+        icon: "👑",
+        shortName: "暴富財富",
+        name: "賺錢擴張・商業與財富",
+        petName: "鎏金暴富招財姆 (Wealth Slime)",
+        prefix: "#GOLD-",
+        placeholder: "寫下你的發財白日夢... (例：中樂透10億買豪宅)",
+        ideas: [
+          "中頭獎樂透10億，提早退休住進海景豪宅",
+          "投資獨角獸公司股票翻了百倍，財富自由",
+          "天天吃頂級和牛與米其林三星，享受奢華人生"
+        ],
+        keywords: [
+          "暴富", "中樂透", "中彩券", "中奖", "有錢", "有钱", "發財", "发财", "億萬", "亿万", 
+          "買房", "买房", "財富自由", "财富自由", "豪宅", "賺大錢", "赚大钱", "富翁", "投資", "股票", "賺錢", "赚钱", "當老闆", "賺", "百萬", "千萬", "億"
+        ],
+        colors: {
+          bgTop: "#2b1c00", bgBottom: "#4d3403",
+          bodyGrad: ["#ffd700", "#ff9100", "#cc7000"],
+          rimColor: "rgba(255, 255, 180, 0.7)",
+          antennaStroke: "#3d2800",
+          orbColor: "#fff494",
+          orbGlow: "#ffd700"
+        },
+        eyeType: "dollar",
+        mouthType: "grin",
+        accessory: "crown",
+        poem: "金錢買不到真正的平靜，但能買下把現實變成遊樂場的入場券。"
+      },
+      {
+        id: "sloth",
+        icon: "💀",
+        shortName: "極致躺平",
+        name: "黑夜避難・極致擺爛",
+        petName: "厭世黑泥姆 (Void Slime)",
+        prefix: "#VOID-",
+        placeholder: "寫下你的躺平心聲... (例：混吃等死、人生好難想當一具屍體)",
+        ideas: [
+          "混吃等死，什麼都不想做只想當個快樂廢物",
+          "人生好累世界快點毀滅，躲在防空洞裡停電",
+          "不用上班不用社交，像一坨爛泥舒服攤平"
+        ],
+        keywords: [
+          "混吃等死", "人生黑暗", "活著好累", "累了", "毀滅", "毀滅吧", "我就爛", "我就烂", 
+          "擺爛", "摆烂", "不想努力", "毫無意義", "當廢物", "当废物", "想當石頭", "想当石头", 
+          "厭世", "厌世", "不想上班", "人間不值得", "爛泥", "爛泥巴", "停電", "防空洞", "爛", "廢"
+        ],
+        colors: {
+          bgTop: "#110b1a", bgBottom: "#1f1430",
+          bodyGrad: ["#231834", "#432868", "#120a1c"],
+          rimColor: "rgba(180, 130, 255, 0.4)",
+          antennaStroke: "#1a1226",
+          orbColor: "#694d8f",
+          orbGlow: "#4b326c"
+        },
+        eyeType: "deadfish",
+        mouthType: "droop",
+        accessory: "blanket",
+        poem: "就算是一坨爛泥，也是最舒服、最不用爬起來的那一坨。"
+      },
+      {
+        id: "rest",
+        icon: "🍮",
+        shortName: "悠哉享樂",
+        name: "極致鬆弛・反內卷享樂",
+        petName: "焦糖布丁悠哉姆 (Cozy Slime)",
+        prefix: "#COZY-",
+        placeholder: "寫下你的放鬆願望... (例：睡到自然醒、無憂無慮當隻貓)",
+        ideas: [
+          "每天睡到自然醒，無憂無慮享受午後微風",
+          "在海島度假村裡喝著檸檬冰茶發呆一整天",
+          "天天吃飽睡、睡飽吃，當一隻快樂幸福的肥貓"
+        ],
+        keywords: [
+          "睡覺", "睡觉", "睡到自然醒", "躺平", "放假", "耍廢", "耍废", "耍笨", "休息", 
+          "悠閒", "悠闲", "放空", "當貓", "养猫", "養老", "退休", "發呆", "发呆", "愜意", "舒服", "無憂無慮", "吃飯", "吃大餐", "美食"
+        ],
+        colors: {
+          bgTop: "#2a1705", bgBottom: "#45260c",
+          bodyGrad: ["#ffb703", "#fb8500", "#d46b08"],
+          caramelTop: "#6a2e05",
+          rimColor: "rgba(255, 230, 160, 0.5)",
+          antennaStroke: "#3b1e06",
+          orbColor: "#fff2cc",
+          orbGlow: "#ffd166"
+        },
+        eyeType: "sleepySmile",
+        mouthType: "drool",
+        accessory: "nightcap",
+        poem: "世界太過匆忙，而你懂得把生命浪費在最奢華的無所事事。"
+      },
+      {
+        id: "heal",
+        icon: "🍀",
+        shortName: "心靈治癒",
+        name: "正向心靈・自我療癒",
+        petName: "翡翠薄荷治癒姆 (Healing Slime)",
+        prefix: "#HEAL-",
+        placeholder: "寫下你的療癒心願... (例：找回內心平靜、好好愛自己)",
+        ideas: [
+          "找回內心真正的平靜，不再被日常焦慮綁架",
+          "學會好好生活、溫柔地接納自己每一個部分",
+          "在晨光與森林呼吸聲中，感受生命自我復原"
+        ],
+        keywords: [
+          "平靜", "平静", "療癒", "疗愈", "焦慮", "不焦慮", "愛自己", "爱自己", "心靈", "心灵", 
+          "自律", "溫柔", "温柔", "善良", "放下", "和解", "治癒", "治愈", "健康", "開心", "快樂", "快乐", "森林"
+        ],
+        colors: {
+          bgTop: "#072417", bgBottom: "#10472e",
+          bodyGrad: ["#38ef7d", "#11998e", "#0a6644"],
+          rimColor: "rgba(168, 255, 200, 0.6)",
+          antennaStroke: "#0a2618",
+          orbColor: "#a8ff78",
+          orbGlow: "#2ecc71"
+        },
+        eyeType: "cross",
+        mouthType: "cat",
+        accessory: "clover",
+        poem: "別害怕慢下來，呼吸之間，你的宇宙正悄悄自我復原。"
+      },
+      {
+        id: "craft",
+        icon: "🤖",
+        shortName: "硬核極客",
+        name: "實用技術・硬派極客",
+        petName: "鈦金電路科技姆 (Cyber Slime)",
+        prefix: "#CYBER-",
+        placeholder: "寫下你的創作野心... (例：獨立開發出全球爆款遊戲)",
+        ideas: [
+          "獨立通宵敲代碼，做出一款風靡全球的傳奇遊戲",
+          "打造一台屬於自己的高科技人工智慧機器人",
+          "寫出一本暢銷百萬冊、被翻拍成電影的科幻小說"
+        ],
+        keywords: [
+          "寫程式", "写程序", "寫code", "coding", "寫作", "小說", "遊戲", "游戏", "畫畫", "画画", 
+          "發明", "发明", "設計", "设计", "工程師", "工程师", "駭客", "黑客", "手作", "木工", "模型", "機器人", "机器人", "電路"
+        ],
+        colors: {
+          bgTop: "#0a192f", bgBottom: "#132f54",
+          bodyGrad: ["#b0bec5", "#546e7a", "#263238"],
+          rimColor: "rgba(0, 229, 255, 0.55)",
+          antennaStroke: "#b87333",
+          orbColor: "#00e5ff",
+          orbGlow: "#00b0ff"
+        },
+        eyeType: "monocle",
+        mouthType: "smirk",
+        accessory: "gear",
+        poem: "代碼與螺絲不會說謊，你的雙手正在鍛造現實的骨骼。"
+      },
+      {
+        id: "sage",
+        icon: "🎓",
+        shortName: "深藍賢者",
+        name: "學術知識・哲理探索",
+        petName: "午夜深藍賢者姆 (Sage Slime)",
+        prefix: "#SAGE-",
+        placeholder: "寫下你的學術探索... (例：考上名校研究所、讀懂哲學)",
+        ideas: [
+          "考上頂尖名校研究所，解開宇宙底層運行邏輯",
+          "在古老的大學圖書館裡，讀遍人類千年的哲學史",
+          "發表一篇震撼學界的重要論文，成為一代學者"
+        ],
+        keywords: [
+          "讀書", "读书", "留學", "留学", "考研", "研究所", "論文", "论文", "大學", "大学", 
+          "學者", "学者", "教授", "哲學", "哲学", "知識", "知识", "歷史", "历史", "圖書館", "图书馆", "研究", "智慧"
+        ],
+        colors: {
+          bgTop: "#090d29", bgBottom: "#151d52",
+          bodyGrad: ["#3d5afe", "#1a237e", "#0d1442"],
+          rimColor: "rgba(140, 180, 255, 0.6)",
+          antennaStroke: "#0a0e2e",
+          orbColor: "#80d8ff",
+          orbGlow: "#2979ff"
+        },
+        eyeType: "glasses",
+        mouthType: "calm",
+        accessory: "mortarboard",
+        poem: "智慧是黑夜裡不熄的提燈，你讀過的每一頁都在重塑世界的經緯。"
+      },
+      {
+        id: "apex",
+        icon: "🎤",
+        shortName: "舞台巨星",
+        name: "影響力・舞台與萬人焦點",
+        petName: "熾熱舞台巨星姆 (Apex Slime)",
+        prefix: "#APEX-",
+        placeholder: "寫下你的成名願景... (例：站上巨蛋主舞台、成為焦點)",
+        ideas: [
+          "站上萬人巨蛋體育館主舞台，成為閃耀全場的傳奇主唱",
+          "發表一場震撼百萬人、改變時代的 TED 演講",
+          "拿下世界第一冠軍獎盃，全場為我的名字歡呼"
+        ],
+        keywords: [
+          "明星", "舞台", "演講", "演讲", "第一名", "冠軍", "冠军", "改變世界", "改变世界", 
+          "總統", "总统", "網紅", "网红", "出道", "主唱", "巨星", "歌手", "演員", "演员", "成名", "焦點", "闪耀"
+        ],
+        colors: {
+          bgTop: "#2b070f", bgBottom: "#4d0e1d",
+          bodyGrad: ["#ff1744", "#d50000", "#8a0011"],
+          rimColor: "rgba(255, 140, 160, 0.6)",
+          antennaStroke: "#2b040a",
+          orbColor: "#ffffff",
+          orbGlow: "#ff5252"
+        },
+        eyeType: "stars",
+        mouthType: "openSing",
+        accessory: "bowtie",
+        poem: "在燈火完全熄滅前，全場的心跳都在為你的名字震顫。"
+      },
+      {
+        id: "aero",
+        icon: "✈️",
+        shortName: "晴空漫遊",
+        name: "冒險遠方・漫遊探索",
+        petName: "天藍晴空旅行姆 (Aero Slime)",
+        prefix: "#AERO-",
+        placeholder: "寫下你的冒險地圖... (例：當空服員環遊世界、看極光)",
+        ideas: [
+          "當空服員環遊世界，每天看萬米高空的日落金雲",
+          "在冰島黑沙灘上開著露營車，看著漫天極光入睡",
+          "當個數位遊牧背包客，浪跡天涯看遍未知世界"
+        ],
+        keywords: [
+          "空服員", "空服员", "空姐", "機師", "机师", "飛機", "飞机", "出國", "出国", 
+          "環遊世界", "环游世界", "旅行", "背包客", "航行", "機場", "机场", "飛行", "飞行", "冒險", "极光", "露營", "自由"
+        ],
+        colors: {
+          bgTop: "#061f33", bgBottom: "#0f3c63",
+          bodyGrad: ["#00e5ff", "#0091ea", "#0064a7"],
+          rimColor: "rgba(180, 245, 255, 0.65)",
+          antennaStroke: "#051e33",
+          orbColor: "#e0f7fa",
+          orbGlow: "#00e5ff"
+        },
+        eyeType: "animeDots",
+        mouthType: "cat",
+        accessory: "goggles",
+        poem: "地平線從來不是邊界，天空才是你真正的起跑線。"
+      },
+      {
+        id: "muse",
+        icon: "🎨",
+        shortName: "文藝夢想",
+        name: "文藝創作・美感定調",
+        petName: "薰衣草夢想家姆 (Muse Slime)",
+        prefix: "#MUSE-",
+        placeholder: "寫下你的浪漫生活... (例：開一間充滿香氣的咖啡花店)",
+        ideas: [
+          "在海邊巷弄開一間木質香氣的獨立咖啡書店",
+          "出自己的個人底片攝影集，記錄世間最溫柔的光",
+          "擁有一間灑滿陽光的頂樓畫室，每天畫下靈魂色彩"
+        ],
+        keywords: [
+          "咖啡店", "咖啡館", "花店", "書店", "寫歌", "寫作", "樂團", "音樂", "摄影", 
+          "浪漫", "文藝", "文艺", "畫家", "画家", "詩人", "诗人", "慢活", "生活美學", "散步", "夕陽"
+        ],
+        colors: {
+          bgTop: "#1c0d24", bgBottom: "#381747",
+          bodyGrad: ["#b388ff", "#7c4dff", "#4a148c"],
+          rimColor: "rgba(235, 185, 255, 0.65)",
+          antennaStroke: "#1a0824",
+          orbColor: "#f3e5f5",
+          orbGlow: "#ea80fc"
+        },
+        eyeType: "wink",
+        mouthType: "cat",
+        accessory: "daisy",
+        poem: "在無人打擾的角落，開一朵不驚動世界的花。"
+      }
+    ];
+
+    // Fallback Slime
+    const FALLBACK_ARCHETYPE = {
+      id: "cosmo",
+      name: "宇宙命定・原始幻獸",
+      petName: "星雲原初始姆 (Cosmo Slime)",
+      prefix: "#COSMO-",
+      colors: {
+        bgTop: "#09071c", bgBottom: "#17123d",
+        bodyGrad: ["#7c4dff", "#304ffe", "#1a237e"],
+        rimColor: "rgba(200, 180, 255, 0.6)",
+        antennaStroke: "#0d0a26",
+        orbColor: "#ffd700",
+        orbGlow: "#7c4dff"
+      },
+      eyeType: "cross",
+      mouthType: "cat",
+      accessory: "stardust",
+      poem: "願望一旦被寫入時空，未來的蝴蝶就已經拍動了翅膀。"
+    };
+
+    /* ==========================================================================
+       2. VECTOR SVG GENERATION ENGINE (ACCURATE TO USER'S SLIME REFERENCE)
+       ========================================================================== */
+    function generateSlimeSVG(archetype, seed, mood = 'positive') {
+      const c = archetype.colors;
+      const gradId = `slime-body-${archetype.id}`;
+      const bgGradId = `slime-bg-${archetype.id}`;
+      const orbGradId = `slime-orb-${archetype.id}`;
+
+      // Water droplet body curve (smooth teardrop with wide plump belly)
+      const bodyPath = `
+        M 200 96 
+        C 190 125, 80 185, 75 240 
+        C 70 285, 120 305, 200 305 
+        C 280 305, 330 285, 325 240 
+        C 320 185, 210 125, 200 96 Z
+      `;
+
+      // Antenna shape (drooping in negative mood, perky in positive mood)
+      let antennaPath = `M 200 96 C 205 60, 235 30, 275 48 C 305 65, 320 100, 330 145`;
+      let orbCx = 330, orbCy = 145;
+
+      if (mood === 'negative') {
+        // Droopy exhausted antenna hanging down to the right floor
+        antennaPath = `M 200 96 C 182 78, 248 102, 256 178 C 262 226, 244 262, 222 264`;
+        orbCx = 222; orbCy = 264;
+      } else {
+        if (archetype.id === "sloth") {
+          // Relaxed gentle curve
+          antennaPath = `M 200 96 C 190 70, 238 60, 265 95 C 280 120, 285 150, 305 160`;
+          orbCx = 305; orbCy = 160;
+        } else if (archetype.id === "rest") {
+          // Springy bouncy curve
+          antennaPath = `M 200 96 C 190 65, 220 40, 255 55 C 285 70, 280 115, 305 130`;
+          orbCx = 305; orbCy = 130;
+        } else if (archetype.id === "apex") {
+          // Lightning bolt curve
+          antennaPath = `M 200 96 L 220 60 L 250 80 L 285 45`;
+          orbCx = 285; orbCy = 45;
+        }
+      }
+
+      // Facial expressions & Mood
+      let eyesSVG = "";
+      let mouthSVG = "";
+      let moodExtraSVG = "";
+
+      if (mood === 'negative') {
+        // 2. 負面表情 (死魚眼 XX 或 暈眩)
+        // Big Anime Cold Sweat Drop on right temple
+        moodExtraSVG += `
+          <!-- Anime Cold Sweat Drop -->
+          <path d="M 280 186 C 280 178, 289 168, 289 168 C 289 168, 298 178, 298 186 C 298 193, 289 196, 280 186 Z" fill="#64b5f6" stroke="#1976d2" stroke-width="1.5" />
+          <ellipse cx="286" cy="182" rx="2" ry="3" fill="#ffffff" opacity="0.8" />
+        `;
+
+        const isDizzySpiral = (seed % 2 === 0);
+
+        if (isDizzySpiral) {
+          // 暈眩旋渦 (@ @)
+          eyesSVG = `
+            <!-- Left Eye Dizzy Spiral -->
+            <g stroke="#1a1a24" stroke-width="3.5" fill="none" stroke-linecap="round">
+              <path d="M 160 222 m 0 -3 a 3 3 0 0 1 3 3 a 7 7 0 0 1 -7 7 a 11 11 0 0 1 -11 -11 a 15 15 0 0 1 15 -15 a 17 17 0 0 1 17 17" />
+              <!-- Right Eye Dizzy Spiral -->
+              <path d="M 240 222 m 0 -3 a 3 3 0 0 1 3 3 a 7 7 0 0 1 -7 7 a 11 11 0 0 1 -11 -11 a 15 15 0 0 1 15 -15 a 17 17 0 0 1 17 17" />
+            </g>
+          `;
+          moodExtraSVG += `
+            <!-- Spinning Dizzy Stars around head -->
+            <text x="175" y="152" font-size="16" fill="#ffd700" transform="rotate(-15 175 152)">💫</text>
+            <text x="228" y="146" font-size="16" fill="#ffd700" transform="rotate(15 228 146)">💫</text>
+          `;
+        } else {
+          // 死魚眼 / 交叉 XX (Deadfish Lines & Knocked-Out XX with heavy purple bags)
+          eyesSVG = `
+            <!-- Dark Exhaustion Eye Bags -->
+            <ellipse cx="160" cy="226" rx="18" ry="12" fill="rgba(35, 15, 55, 0.45)" />
+            <ellipse cx="240" cy="226" rx="18" ry="12" fill="rgba(35, 15, 55, 0.45)" />
+            <!-- Left Eye XX -->
+            <path d="M 148 214 L 172 228 M 172 214 L 148 228" stroke="#151520" stroke-width="4.5" stroke-linecap="round" />
+            <!-- Right Eye XX -->
+            <path d="M 228 214 L 252 228 M 252 214 L 228 228" stroke="#151520" stroke-width="4.5" stroke-linecap="round" />
+          `;
+          moodExtraSVG += `
+            <!-- Forehead Exhaustion Lines ||| -->
+            <line x1="193" y1="168" x2="193" y2="183" stroke="rgba(30, 15, 50, 0.55)" stroke-width="2.5" stroke-linecap="round" />
+            <line x1="200" y1="165" x2="200" y2="185" stroke="rgba(30, 15, 50, 0.55)" stroke-width="2.5" stroke-linecap="round" />
+            <line x1="207" y1="168" x2="207" y2="183" stroke="rgba(30, 15, 50, 0.55)" stroke-width="2.5" stroke-linecap="round" />
+          `;
+        }
+
+        // Exhausted wavy squiggly mouth ~
+        mouthSVG = `<path d="M 191 242 Q 196 238 200 242 Q 204 246 209 240" stroke="#151520" stroke-width="3" stroke-linecap="round" fill="none" />`;
+
+      } else {
+        // 1. 正向表情 (眼睛亮晶晶 - Sparkling Anime Starburst Eyes)
+        eyesSVG = `
+          <!-- Left Eye Base & Depth -->
+          <ellipse cx="160" cy="220" rx="15" ry="17" fill="#14121e" />
+          <ellipse cx="160" cy="221" rx="12" ry="14" fill="#2d1d4c" />
+          <!-- Sparkling 4-point Diamond Star in Left Eye -->
+          <path d="M 160 207 Q 160 220 172 220 Q 160 220 160 233 Q 160 220 148 220 Q 160 220 160 207 Z" fill="#ffd700" />
+          <circle cx="160" cy="220" r="3.5" fill="#ffffff" />
+          <!-- Glistening Catchlights -->
+          <circle cx="166" cy="214" r="3.5" fill="#ffffff" />
+          <circle cx="154" cy="226" r="2.2" fill="#ffffff" />
+
+          <!-- Right Eye Base & Depth -->
+          <ellipse cx="240" cy="220" rx="15" ry="17" fill="#14121e" />
+          <ellipse cx="240" cy="221" rx="12" ry="14" fill="#2d1d4c" />
+          <!-- Sparkling 4-point Diamond Star in Right Eye -->
+          <path d="M 240 207 Q 240 220 252 220 Q 240 220 240 233 Q 240 220 228 220 Q 240 220 240 207 Z" fill="#ffd700" />
+          <circle cx="240" cy="220" r="3.5" fill="#ffffff" />
+          <!-- Glistening Catchlights -->
+          <circle cx="246" cy="214" r="3.5" fill="#ffffff" />
+          <circle cx="234" cy="226" r="2.2" fill="#ffffff" />
+
+          <!-- Rosy Radiant Cheeks -->
+          <ellipse cx="138" cy="235" rx="12" ry="6" fill="rgba(255, 99, 132, 0.45)" />
+          <line x1="134" y1="233" x2="132" y2="237" stroke="#ff3366" stroke-width="1.5" stroke-linecap="round" />
+          <line x1="138" y1="233" x2="136" y2="237" stroke="#ff3366" stroke-width="1.5" stroke-linecap="round" />
+          <line x1="142" y1="233" x2="140" y2="237" stroke="#ff3366" stroke-width="1.5" stroke-linecap="round" />
+
+          <ellipse cx="262" cy="235" rx="12" ry="6" fill="rgba(255, 99, 132, 0.45)" />
+          <line x1="258" y1="233" x2="256" y2="237" stroke="#ff3366" stroke-width="1.5" stroke-linecap="round" />
+          <line x1="262" y1="233" x2="260" y2="237" stroke="#ff3366" stroke-width="1.5" stroke-linecap="round" />
+          <line x1="266" y1="233" x2="264" y2="237" stroke="#ff3366" stroke-width="1.5" stroke-linecap="round" />
+        `;
+
+        moodExtraSVG += `
+          <!-- Sparkling Anime Magic Dust -->
+          <text x="118" y="210" font-size="16" fill="#ffd700">✦</text>
+          <text x="272" y="206" font-size="16" fill="#ffd700">✦</text>
+          <circle cx="126" cy="224" r="2" fill="#ffffff" opacity="0.8" />
+          <circle cx="276" cy="220" r="2" fill="#ffffff" opacity="0.8" />
+        `;
+
+        // Cheerful Cat Mouth or Happy Grin
+        if (archetype.mouthType === "grin") {
+          mouthSVG = `<path d="M 188 235 Q 200 252 212 235 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" />`;
+        } else if (archetype.mouthType === "openSing") {
+          mouthSVG = `<ellipse cx="200" cy="242" rx="8" ry="11" fill="#e74c3c" stroke="#1a1a1a" stroke-width="2.5" />`;
+        } else {
+          mouthSVG = `<path d="M 190 237 Q 195 244 200 239 Q 205 244 210 237" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round" fill="none" />`;
+        }
+      }
+
+      // Accessories rendering
+      let accessorySVG = "";
+      if (archetype.accessory === "crown") {
+        // Golden mini royal crown on top
+        accessorySVG = `
+          <g transform="translate(182, 68) scale(0.9)">
+            <path d="M 0 24 L 6 0 L 20 14 L 34 0 L 40 24 Z" fill="#ffd700" stroke="#cc7000" stroke-width="2" />
+            <circle cx="6" cy="0" r="3.5" fill="#e74c3c" />
+            <circle cx="20" cy="14" r="3.5" fill="#3498db" />
+            <circle cx="34" cy="0" r="3.5" fill="#e74c3c" />
+            <rect x="0" y="24" width="40" height="5" fill="#f39c12" />
+          </g>
+        `;
+      } else if (archetype.accessory === "mortarboard") {
+        // Graduation mortarboard
+        accessorySVG = `
+          <g transform="translate(165, 62) scale(0.9)">
+            <polygon points="40,0 80,14 40,28 0,14" fill="#1a1a24" stroke="#000" stroke-width="1.5" />
+            <rect x="25" y="24" width="30" height="12" fill="#2c2c38" />
+            <circle cx="40" cy="14" r="3" fill="#ffd700" />
+            <path d="M 40 14 Q 55 18 68 28 L 72 38" stroke="#ffd700" stroke-width="2.5" fill="none" />
+            <circle cx="72" cy="40" r="3.5" fill="#ffd700" />
+          </g>
+        `;
+      } else if (archetype.accessory === "nightcap") {
+        // Blue & white striped nightcap + zZZ
+        accessorySVG = `
+          <g transform="translate(155, 55)">
+            <path d="M 20 40 Q 30 0 75 10 Q 95 18 100 45" fill="#3498db" stroke="#2980b9" stroke-width="2" />
+            <path d="M 32 30 Q 42 6 70 12" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" />
+            <circle cx="102" cy="48" r="9" fill="#ffffff" stroke="#ddd" stroke-width="1" />
+          </g>
+          <!-- zZZ bubbles -->
+          <text x="260" y="160" font-family="sans-serif" font-weight="900" font-size="18" fill="rgba(255,255,255,0.7)">z</text>
+          <text x="274" y="142" font-family="sans-serif" font-weight="900" font-size="22" fill="rgba(255,255,255,0.85)">Z</text>
+          <text x="290" y="120" font-family="sans-serif" font-weight="900" font-size="28" fill="#ffd700">Z</text>
+        `;
+      } else if (archetype.accessory === "goggles") {
+        // Aviator goggles on forehead
+        accessorySVG = `
+          <g transform="translate(135, 148) scale(0.9)">
+            <!-- Strap -->
+            <path d="M 0 16 Q 72 10 145 16" stroke="#5d4037" stroke-width="8" fill="none" />
+            <!-- Left lens -->
+            <rect x="24" y="2" width="38" height="28" rx="8" fill="#e0f7fa" stroke="#d32f2f" stroke-width="4" />
+            <line x1="30" y1="8" x2="48" y2="24" stroke="#fff" stroke-width="2.5" stroke-linecap="round" />
+            <!-- Bridge -->
+            <rect x="62" y="12" width="18" height="6" fill="#d32f2f" />
+            <!-- Right lens -->
+            <rect x="80" y="2" width="38" height="28" rx="8" fill="#e0f7fa" stroke="#d32f2f" stroke-width="4" />
+            <line x1="86" y1="8" x2="104" y2="24" stroke="#fff" stroke-width="2.5" stroke-linecap="round" />
+          </g>
+        `;
+      } else if (archetype.accessory === "clover") {
+        // Floating 4-leaf clover sparkles
+        accessorySVG = `
+          <g transform="translate(280, 200) scale(0.85)">
+            <circle cx="10" cy="5" r="8" fill="#2ecc71" opacity="0.9" />
+            <circle cx="20" cy="12" r="8" fill="#2ecc71" opacity="0.9" />
+            <circle cx="15" cy="22" r="8" fill="#2ecc71" opacity="0.9" />
+            <circle cx="5" cy="15" r="8" fill="#2ecc71" opacity="0.9" />
+            <circle cx="12" cy="13" r="3" fill="#ffd700" />
+            <path d="M 12 18 Q 8 32 4 36" stroke="#27ae60" stroke-width="2" fill="none" />
+          </g>
+          <!-- Sparkles -->
+          <text x="100" y="170" font-size="18" fill="#ffd700" opacity="0.8">✦</text>
+          <text x="290" y="270" font-size="14" fill="#a8ff78" opacity="0.8">✦</text>
+        `;
+      } else if (archetype.accessory === "bowtie") {
+        // Black bowtie & microphone
+        accessorySVG = `
+          <!-- Bowtie -->
+          <g transform="translate(182, 260) scale(0.9)">
+            <polygon points="0,0 18,8 0,16" fill="#111" />
+            <polygon points="36,0 18,8 36,16" fill="#111" />
+            <circle cx="18" cy="8" r="5" fill="#333" />
+          </g>
+          <!-- Mic floating -->
+          <g transform="translate(285, 210) rotate(-15)">
+            <rect x="0" y="0" width="12" height="18" rx="6" fill="#95a5a6" stroke="#7f8c8d" stroke-width="1.5" />
+            <rect x="3" y="18" width="6" height="14" fill="#34495e" />
+          </g>
+        `;
+      } else if (archetype.accessory === "daisy") {
+        // Daisy flower on head
+        accessorySVG = `
+          <g transform="translate(130, 115) scale(0.8)">
+            <circle cx="20" cy="8" r="7" fill="#fff" />
+            <circle cx="32" cy="14" r="7" fill="#fff" />
+            <circle cx="32" cy="28" r="7" fill="#fff" />
+            <circle cx="20" cy="34" r="7" fill="#fff" />
+            <circle cx="8" cy="28" r="7" fill="#fff" />
+            <circle cx="8" cy="14" r="7" fill="#fff" />
+            <circle cx="20" cy="21" r="7.5" fill="#f1c40f" />
+          </g>
+        `;
+      } else if (archetype.accessory === "blanket") {
+        // Patchwork small blanket on void slime
+        accessorySVG = `
+          <g transform="translate(100, 260)">
+            <path d="M 0 10 Q 100 0 200 12 L 195 24 Q 100 20 0 20 Z" fill="#4a3e5c" opacity="0.75" />
+            <rect x="40" y="8" width="18" height="12" fill="#342845" rx="2" />
+            <line x1="38" y1="14" x2="60" y2="14" stroke="#9b8bb3" stroke-width="1.2" stroke-dasharray="2 2" />
+          </g>
+        `;
+      }
+
+      // Full SVG Composite (ViewBox 0 0 400 340)
+      return `
+        <svg class="slime-vector-art" viewBox="0 0 400 340" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <!-- Background Radial Glow -->
+            <radialGradient id="${bgGradId}" cx="50%" cy="50%" r="65%">
+              <stop offset="0%" stop-color="${c.bgBottom}" />
+              <stop offset="100%" stop-color="${c.bgTop}" />
+            </radialGradient>
+
+            <!-- Slime 3D Jelly Gradient -->
+            <radialGradient id="${gradId}" cx="38%" cy="32%" r="70%">
+              <stop offset="0%" stop-color="${c.bodyGrad[0]}" />
+              <stop offset="55%" stop-color="${c.bodyGrad[1]}" />
+              <stop offset="100%" stop-color="${c.bodyGrad[2]}" />
+            </radialGradient>
+
+            <!-- Glowing Orb Gradient -->
+            <radialGradient id="${orbGradId}" cx="35%" cy="35%" r="65%">
+              <stop offset="0%" stop-color="#ffffff" />
+              <stop offset="60%" stop-color="${c.orbColor}" />
+              <stop offset="100%" stop-color="${c.orbGlow}" />
+            </radialGradient>
+
+            <!-- Soft Bottom Drop Shadow Filter -->
+            <filter id="shadowFilter" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="6" />
+              <feOffset dx="0" dy="6" result="offsetblur" />
+              <feComponentTransfer>
+                <feFuncA type="linear" slope="0.45" />
+              </feComponentTransfer>
+              <feMerge> 
+                <feMergeNode />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- 1. Background Environment -->
+          <rect width="400" height="340" fill="url(#${bgGradId})" />
+
+          <!-- Ambient Sparkles in background -->
+          <circle cx="80" cy="70" r="1.5" fill="#fff" opacity="0.5" />
+          <circle cx="330" cy="80" r="1.8" fill="#fff" opacity="0.6" />
+          <circle cx="350" cy="260" r="1.2" fill="#fff" opacity="0.4" />
+          <circle cx="60" cy="270" r="2" fill="#fff" opacity="0.5" />
+
+          <!-- 2. Bottom Ground Shadow -->
+          <ellipse cx="200" cy="302" rx="125" ry="18" fill="rgba(0, 0, 0, 0.4)" filter="url(#shadowFilter)" />
+
+          <!-- 3. Antenna Wire (Behind or on top of body) -->
+          <path d="${antennaPath}" fill="none" stroke="${c.antennaStroke}" stroke-width="3.5" stroke-linecap="round" />
+          <!-- Antenna Glowing Bead -->
+          <circle cx="${orbCx}" cy="${orbCy}" r="15" fill="url(#${orbGradId})" filter="drop-shadow(0 0 6px ${c.orbGlow})" />
+
+          <!-- 4. Slime Droplet Body -->
+          <path d="${bodyPath}" fill="url(#${gradId})" stroke="${c.antennaStroke}" stroke-width="2.5" />
+
+          <!-- 5. Translucent Bottom Rim Light Reflection -->
+          <path d="M 95 255 C 130 295, 270 295, 305 255 C 285 285, 115 285, 95 255 Z" fill="${c.rimColor}" opacity="0.75" />
+
+          <!-- 6. Big Glossy Specular Bubble Highlights (Reference Match!) -->
+          <!-- Main Upper-Right Big Oval Highlight -->
+          <ellipse cx="260" cy="180" rx="36" ry="24" transform="rotate(-25 260 180)" fill="#ffffff" opacity="0.82" />
+          <!-- Small Secondary Sparkle Dot -->
+          <circle cx="300" cy="195" r="9" fill="#ffffff" opacity="0.88" />
+          <!-- Subtle Top Left Tip Gleam -->
+          <ellipse cx="192" cy="120" rx="8" ry="16" transform="rotate(18 192 120)" fill="#ffffff" opacity="0.45" />
+
+          <!-- 7. Expressive Facial Features & Mood Extras -->
+          <g>
+            ${eyesSVG}
+            ${mouthSVG}
+            ${moodExtraSVG}
+          </g>
+
+          <!-- 8. Distinctive Accessories -->
+          ${accessorySVG}
+        </svg>
+      `;
+    }
+
+    /* ==========================================================================
+       3. AMBIENT FLOATING SUNBEAM & DANDELION DUST PARTICLES
+       ========================================================================== */
+    const bgCanvas = document.getElementById('ambient-stars');
+    const bgCtx = bgCanvas.getContext('2d');
+    let bgStars = [];
+
+    function resizeBgCanvas() {
+      bgCanvas.width = window.innerWidth;
+      bgCanvas.height = window.innerHeight;
+      bgStars = [];
+      const moteCount = Math.floor((bgCanvas.width * bgCanvas.height) / 11000);
+      for (let i = 0; i < moteCount; i++) {
+        bgStars.push({
+          x: Math.random() * bgCanvas.width,
+          y: Math.random() * bgCanvas.height,
+          radius: Math.random() * 2.2 + 0.8,
+          alpha: Math.random() * 0.55 + 0.35,
+          speedY: Math.random() * 0.45 + 0.15,
+          driftX: (Math.random() - 0.45) * 0.3,
+          phase: Math.random() * Math.PI * 2
+        });
+      }
+    }
+
+    function renderBgStars() {
+      bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+      const time = performance.now() * 0.002;
+      for (let s of bgStars) {
+        s.y -= s.speedY;
+        s.x += Math.sin(time + s.phase) * 0.4 + s.driftX;
+        if (s.y < -10) {
+          s.y = bgCanvas.height + 10;
+          s.x = Math.random() * bgCanvas.width;
+        }
+        if (s.x < -10) s.x = bgCanvas.width + 10;
+        if (s.x > bgCanvas.width + 10) s.x = -10;
+
+        bgCtx.fillStyle = `rgba(255, 255, 255, ${s.alpha * 0.75})`;
+        bgCtx.beginPath();
+        bgCtx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+        bgCtx.fill();
+      }
+      requestAnimationFrame(renderBgStars);
+    }
+
+    window.addEventListener('resize', resizeBgCanvas);
+    resizeBgCanvas();
+    renderBgStars();
+
+    /* ==========================================================================
+       4. CHEST BURST PARTICLE SYSTEM (CANVAS ANIMATION)
+       ========================================================================== */
+    const particleCanvas = document.getElementById('particle-canvas');
+    const pCtx = particleCanvas.getContext('2d');
+    let particles = [];
+    let particleAnimId = null;
+
+    function initParticleCanvas() {
+      particleCanvas.width = 440;
+      particleCanvas.height = 380;
+    }
+    initParticleCanvas();
+
+    function triggerParticleBurst(isMimic = false) {
+      particles = [];
+      const originX = particleCanvas.width / 2;
+      const originY = particleCanvas.height - 70;
+      const count = 95;
+
+      for (let i = 0; i < count; i++) {
+        const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.7;
+        const speed = Math.random() * 9 + 4;
+        let hue;
+        if (isMimic) {
+          // Purple, magenta, crimson demon sparks
+          hue = Math.random() > 0.4 ? (275 + Math.random() * 45) : (335 + Math.random() * 30);
+        } else {
+          // Golden and cosmic cyan holy sparks
+          hue = Math.random() > 0.3 ? (45 + Math.random() * 20) : (190 + Math.random() * 40);
+        }
+        particles.push({
+          x: originX,
+          y: originY,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          radius: Math.random() * 3.5 + 1.2,
+          color: `hsl(${hue}, 95%, ${65 + Math.random() * 25}%)`,
+          life: 1.0,
+          decay: Math.random() * 0.02 + 0.012,
+          gravity: 0.16
+        });
+      }
+
+      if (particleAnimId) cancelAnimationFrame(particleAnimId);
+      animateParticles();
+    }
+
+    function animateParticles() {
+      pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+      let activeCount = 0;
+
+      for (let p of particles) {
+        if (p.life > 0) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += p.gravity;
+          p.vx *= 0.98;
+          p.life -= p.decay;
+
+          pCtx.save();
+          pCtx.globalAlpha = Math.max(0, p.life);
+          pCtx.shadowBlur = 10;
+          pCtx.shadowColor = p.color;
+          pCtx.fillStyle = p.color;
+          pCtx.beginPath();
+          pCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          pCtx.fill();
+          pCtx.restore();
+
+          activeCount++;
+        }
+      }
+
+      if (activeCount > 0) {
+        particleAnimId = requestAnimationFrame(animateParticles);
+      } else {
+        pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+      }
+    }
+
+    /* ==========================================================================
+       5. CELESTIAL & MONSTER AUDIO SYNTHESIS (WEB AUDIO API - ZERO ASSETS)
+       ========================================================================== */
+    let audioCtx = null;
+
+    function getAudioContext() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return null;
+        if (!audioCtx) {
+          audioCtx = new AudioContext();
+        }
+        return audioCtx;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // Proactively unlock AudioContext on any first user gesture (touch, click, keydown)
+    function unlockAudioContext() {
+      const ctx = getAudioContext();
+      if (ctx && ctx.state === 'suspended') {
+        ctx.resume();
+      }
+    }
+    ['pointerdown', 'touchstart', 'mousedown', 'keydown', 'click'].forEach(evt => {
+      window.addEventListener(evt, unlockAudioContext, { passive: true });
+    });
+
+    function playCelestialSound() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+
+        const runSound = () => {
+          const now = ctx.currentTime;
+          const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+
+          notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+
+            gain.gain.setValueAtTime(0.0001, now + idx * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.14, now + idx * 0.08 + 0.04);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.08 + 1.1);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(now + idx * 0.08);
+            osc.stop(now + idx * 0.08 + 1.2);
+          });
+        };
+
+        if (ctx.state === 'suspended') {
+          ctx.resume().then(runSound).catch(runSound);
+        } else {
+          runSound();
+        }
+      } catch (e) {
+        // Audio error failover
+      }
+    }
+
+    // High-impact, powerful Mimic Monster Sound (Roar Growl + Fang Chomp + Jaw Clack)
+    function playMimicAwakenSound() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+
+        const runSound = () => {
+          const now = ctx.currentTime;
+
+          // Master Dynamics Compressor: massive loudness boost without digital distortion
+          const comp = ctx.createDynamicsCompressor();
+          comp.threshold.setValueAtTime(-14, now);
+          comp.knee.setValueAtTime(6, now);
+          comp.ratio.setValueAtTime(10, now);
+          comp.attack.setValueAtTime(0.002, now);
+          comp.release.setValueAtTime(0.22, now);
+          comp.connect(ctx.destination);
+
+          // 1. Ferocious Monster Growl / Roar (Mid-range audible on all phone/laptop speakers)
+          const growlOsc = ctx.createOscillator();
+          const growlGain = ctx.createGain();
+          growlOsc.type = 'sawtooth';
+          growlOsc.frequency.setValueAtTime(320, now);
+          growlOsc.frequency.exponentialRampToValueAtTime(110, now + 0.44);
+
+          growlGain.gain.setValueAtTime(0.001, now);
+          growlGain.gain.exponentialRampToValueAtTime(0.55, now + 0.04);
+          growlGain.gain.exponentialRampToValueAtTime(0.001, now + 0.48);
+
+          // Throat Rattle LFO (32Hz flutter FM modulation for terrifying animal roar)
+          const lfo = ctx.createOscillator();
+          const lfoGain = ctx.createGain();
+          lfo.frequency.setValueAtTime(32, now);
+          lfoGain.gain.setValueAtTime(50, now);
+          lfo.connect(growlOsc.frequency);
+          lfo.start(now);
+          lfo.stop(now + 0.5);
+
+          growlOsc.connect(growlGain);
+          growlGain.connect(comp);
+          growlOsc.start(now);
+          growlOsc.stop(now + 0.52);
+
+          // 2. Brutal Fang Snap / Jaw Bite Chomp (Punchy mid-high attack)
+          const chompOsc = ctx.createOscillator();
+          const chompGain = ctx.createGain();
+          chompOsc.type = 'triangle';
+          chompOsc.frequency.setValueAtTime(720, now + 0.08);
+          chompOsc.frequency.exponentialRampToValueAtTime(95, now + 0.28);
+
+          chompGain.gain.setValueAtTime(0.001, now + 0.08);
+          chompGain.gain.exponentialRampToValueAtTime(0.62, now + 0.12);
+          chompGain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+
+          chompOsc.connect(chompGain);
+          chompGain.connect(comp);
+          chompOsc.start(now + 0.08);
+          chompOsc.stop(now + 0.42);
+
+          // 3. Heavy Wooden Chest Jaw Slam Transient (Impact "CLACK")
+          const snapOsc = ctx.createOscillator();
+          const snapGain = ctx.createGain();
+          snapOsc.type = 'square';
+          snapOsc.frequency.setValueAtTime(450, now + 0.09);
+          snapOsc.frequency.exponentialRampToValueAtTime(65, now + 0.18);
+          snapGain.gain.setValueAtTime(0.40, now + 0.09);
+          snapGain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+
+          snapOsc.connect(snapGain);
+          snapGain.connect(comp);
+          snapOsc.start(now + 0.09);
+          snapOsc.stop(now + 0.25);
+        };
+
+        if (ctx.state === 'suspended') {
+          ctx.resume().then(runSound).catch(runSound);
+        } else {
+          runSound();
+        }
+      } catch (e) {
+        // Audio failover
+      }
+    }
+
+    function playCoinJingleSound() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+
+        const runSound = () => {
+          const now = ctx.currentTime;
+
+          // 1. Subtle wooden body thud / rattle
+          const thudOsc = ctx.createOscillator();
+          const thudGain = ctx.createGain();
+          thudOsc.type = 'sine';
+          thudOsc.frequency.setValueAtTime(140, now);
+          thudOsc.frequency.exponentialRampToValueAtTime(45, now + 0.09);
+          thudGain.gain.setValueAtTime(0.12, now);
+          thudGain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+          thudOsc.connect(thudGain);
+          thudGain.connect(ctx.destination);
+          thudOsc.start(now);
+          thudOsc.stop(now + 0.12);
+
+          // 2. High metallic gold coins clinking sequence
+          const coinStrikes = [
+            { delay: 0.00, f1: 2093, f2: 3136, dur: 0.18, vol: 0.16 }, // C7, G7
+            { delay: 0.05, f1: 2637, f2: 3951, dur: 0.20, vol: 0.14 }, // E7, B7
+            { delay: 0.11, f1: 2349, f2: 3520, dur: 0.22, vol: 0.15 }, // D7, A7
+            { delay: 0.18, f1: 3136, f2: 4186, dur: 0.30, vol: 0.18 }, // G7, C8 (bright resonant ring)
+          ];
+
+          coinStrikes.forEach(strike => {
+            const strikeTime = now + strike.delay;
+            [strike.f1, strike.f2].forEach((freq, idx) => {
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.type = idx === 0 ? 'sine' : 'triangle';
+              osc.frequency.setValueAtTime(freq, strikeTime);
+              osc.frequency.exponentialRampToValueAtTime(freq * 0.99, strikeTime + strike.dur);
+
+              gain.gain.setValueAtTime(0.0001, strikeTime);
+              gain.gain.exponentialRampToValueAtTime(strike.vol * (idx === 0 ? 0.7 : 0.4), strikeTime + 0.003);
+              gain.gain.exponentialRampToValueAtTime(0.0001, strikeTime + strike.dur);
+
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              osc.start(strikeTime);
+              osc.stop(strikeTime + strike.dur + 0.02);
+            });
+          });
+        };
+
+        if (ctx.state === 'suspended') {
+          ctx.resume().then(runSound).catch(runSound);
+        } else {
+          runSound();
+        }
+      } catch (e) {
+        // Audio failover
+      }
+    }
+
+    /* ==========================================================================
+       6. SEMANTIC KEYWORD WEIGHT ANALYZER
+       ========================================================================== */
+    function hashString(str) {
+      let h = 2166136261 >>> 0;
+      for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return h >>> 0;
+    }
+
+    function analyzeArchetype(inputText) {
+      const normalized = inputText.trim().toLowerCase();
+      let bestArchetype = null;
+      let highestScore = 0;
+
+      for (const arch of ARCHETYPES) {
+        let score = 0;
+        for (const kw of arch.keywords) {
+          const kwLower = kw.toLowerCase();
+          if (normalized.includes(kwLower)) {
+            // Longer matching words get higher weight
+            score += Math.max(1, kwLower.length * 2);
+          }
+        }
+        if (score > highestScore) {
+          highestScore = score;
+          bestArchetype = arch;
+        }
+      }
+
+      return highestScore > 0 ? bestArchetype : FALLBACK_ARCHETYPE;
+    }
+
+    /* ==========================================================================
+       7. UI INTERACTION & TWO-STEP STEPPER CONTROLLER (OPTION 2)
+       ========================================================================== */
+    const viewStep1 = document.getElementById('view-step-1');
+    const viewStep2 = document.getElementById('view-step-2');
+    const backToStep1Btn = document.getElementById('back-to-step1-btn');
+    const bannerIcon = document.getElementById('banner-icon');
+    const bannerTitle = document.getElementById('banner-title');
+    const bannerPet = document.getElementById('banner-pet');
+
+    const dreamInput = document.getElementById('dream-input');
+    const charCounter = document.getElementById('char-counter');
+    const depositBtn = document.getElementById('deposit-btn');
+    const chestBox = document.getElementById('chest-box');
+    const chestLockBtn = document.getElementById('chest-lock-btn');
+
+    const stageInput = document.getElementById('stage-input');
+    const stageResult = document.getElementById('stage-result');
+    const toastElem = document.getElementById('toast-msg');
+
+    const factionsGrid = document.getElementById('factions-grid');
+    const dynamicChipsContainer = document.getElementById('dynamic-chips-container');
+
+    const slimeSvgContainer = document.getElementById('slime-svg-container');
+    const cardArchetypeBadge = document.getElementById('card-archetype-name');
+    const cardPetName = document.getElementById('card-pet-name');
+    const cardIdText = document.getElementById('card-id-text');
+    const cardStateTag = document.getElementById('card-state-tag');
+    const cardQuoteText = document.getElementById('card-quote-text');
+    const cardOracleText = document.getElementById('card-oracle-text');
+    const cardTimestamp = document.getElementById('card-timestamp');
+    const downloadBtn = document.getElementById('download-btn');
+    const resetBtn = document.getElementById('reset-btn');
+
+    let selectedFaction = ARCHETYPES[0]; // Default to 👑 暴富財富派
+    let currentChestMode = 'normal'; // 'normal' | 'mimic'
+    let currentMood = 'positive'; // Automatically evaluated by judgeDreamMood()
+    let currentDreamText = "";
+    let currentArchetype = null;
+    let currentDreamId = "";
+    let currentSeed = 0;
+    let currentSvgCode = "";
+    let isProcessing = false;
+
+    // Switch between Normal Divine Chest & Mimic Monster Chest
+    function setChestMode(mode, triggerSoundAndToast = true) {
+      if (mode === 'mimic') {
+        currentChestMode = 'mimic';
+        chestBox.classList.add('mimic-mode');
+        chestBox.classList.remove('mimic-awaken');
+        void chestBox.offsetWidth; // Force CSS reflow for jolt
+        chestBox.classList.add('mimic-awaken');
+        if (triggerSoundAndToast) {
+          playMimicAwakenSound();
+        }
+      } else {
+        const wasMimic = currentChestMode === 'mimic';
+        currentChestMode = 'normal';
+        chestBox.classList.remove('mimic-mode');
+        chestBox.classList.remove('mimic-awaken');
+        if (triggerSoundAndToast && wasMimic) {
+          playCelestialSound();
+        }
+      }
+    }
+
+    /* ==========================================================================
+       AUTOMATIC SENTIMENT ENGINE (BLIND EVALUATION: USER DOES NOT CHOOSE / PREVIEW)
+       ========================================================================== */
+    const NEGATIVE_LEXICON = [
+      // 疲勞與虛脫
+      "累", "好累", "太累", "好想睡", "睡不醒", "沒力", "无力", "無力", "虛脫", "虚脱", 
+      "心累", "好疲憊", "疲憊", "疲倦", "癱", "瘫", "頭痛", "头痛", "頭暈", "头晕", "暈", "晕", "昏",
+      // 擺爛與厭世
+      "擺爛", "摆烂", "我就爛", "我就烂", "爛", "烂", "躺平", "不想努力", "不想動", "不想动", 
+      "當廢物", "当废物", "廢物", "废物", "廢柴", "废柴", "混吃等死", "當米蟲", "当米虫", 
+      "當石頭", "当石头", "當植物", "当植物", "人間不值得", "耍廢", "耍废", "爛泥", "烂泥",
+      // 煩躁、崩潰與抗拒
+      "煩", "烦", "好煩", "好烦", "煩躁", "烦躁", "煩死", "烦死", "抓狂", "受夠", "受够", 
+      "崩潰", "崩溃", "暴躁", "氣死", "气死", "討厭", "讨厌", "好討厭", "不爽", "好幹", "想逃", "逃跑", "逃離", "逃避",
+      // 厭工與厭學
+      "不想上班", "不想上學", "不想上学", "不想上課", "不想上课", "不想讀書", "不想读书", 
+      "不想念書", "不想念书", "不想考", "不想社交", "不想面對", "不想面对", "離職", "离职", "辭職", "辞职", "退學", "退学",
+      // 毀滅與絕望
+      "毀滅", "毁灭", "世界毀滅", "世界毁灭", "毀滅吧", "毁灭吧", "想死", "想消失", "不想活", 
+      "死掉", "死了", "好想死", "痛苦", "絕望", "绝望", "沒救", "没救", "悲慘", "悲惨", 
+      "難過", "难过", "傷心", "伤心", "憂鬱", "忧郁", "抑鬱", "抑郁", "活不下去", "人生黑暗",
+      // 無意義與放空
+      "無所謂", "无所谓", "算了", "沒意義", "没意义", "毫無意義", "毫无意义", "空虛", "空虚", "茫然", "迷惘"
+    ];
+
+    const POSITIVE_LEXICON = [
+      // 願景與熱情
+      "希望", "夢想", "梦想", "願望", "愿望", "憧憬", "未來", "未来", "目標", "目标", 
+      "理想", "努力", "奮鬥", "奋斗", "衝刺", "冲刺", "向前", "加油", "期待", "追求", 
+      "發光", "发光", "閃耀", "闪耀", "光芒", "照亮", "自信", "驕傲", "骄傲",
+      // 喜悅與美好
+      "開心", "开心", "快樂", "快乐", "幸福", "美好", "歡樂", "欢乐", "歡笑", "欢笑", 
+      "平靜", "平静", "溫暖", "温暖", "治癒", "治愈", "療癒", "疗愈", "享受", "愛", "爱", "喜歡", "喜欢", "幸運", "幸运",
+      // 成功與暴富
+      "成功", "第一名", "第一", "冠軍", "冠军", "贏", "赢", "獲勝", "获胜", "發財", "发财", 
+      "暴富", "致富", "有錢", "有钱", "賺大錢", "赚大钱", "賺錢", "赚钱", "財富自由", "财富自由", 
+      "富翁", "大獎", "大奖", "頭獎", "头奖", "百萬", "百万", "千萬", "千万", "億萬", "亿万", "豪宅", "買房", "买房",
+      // 頂峰與榮耀
+      "站上", "巨星", "成名", "大師", "大师", "考上", "錄取", "录取", "研究所", "碩士", "硕士", "博士", "得獎", "得奖",
+      // 自由與冒險
+      "環遊世界", "环游世界", "旅行", "探險", "探险", "冒險", "冒险", "創造", "创造", "發明", "发明", "打造", "極光", "极光"
+    ];
+
+    function judgeDreamMood(text, archetype) {
+      if (!text || text.trim() === '') {
+        return archetype.id === 'sloth' ? 'negative' : 'positive';
+      }
+
+      const cleanText = text.toLowerCase();
+      let negScore = 0;
+      let posScore = 0;
+
+      // Base weight by archetype personality
+      if (archetype.id === 'sloth') {
+        negScore += 2;
+      } else {
+        posScore += 1;
+      }
+
+      for (const word of NEGATIVE_LEXICON) {
+        if (cleanText.includes(word.toLowerCase())) {
+          negScore += (word.length >= 3 ? 3 : 2);
+        }
+      }
+
+      for (const word of POSITIVE_LEXICON) {
+        if (cleanText.includes(word.toLowerCase())) {
+          posScore += (word.length >= 3 ? 3 : 2);
+        }
+      }
+
+      return negScore > posScore ? 'negative' : 'positive';
+    }
+
+    // Render 9 Interactive Faction Cards in Step 1
+    function renderFactions() {
+      factionsGrid.innerHTML = '';
+      ARCHETYPES.forEach(arch => {
+        const card = document.createElement('div');
+        card.className = 'faction-card';
+        card.innerHTML = `
+          <span class="faction-card-icon">${arch.icon}</span>
+          <span class="faction-card-name">${arch.shortName}</span>
+        `;
+        card.addEventListener('click', () => selectFaction(arch));
+        factionsGrid.appendChild(card);
+      });
+    }
+
+    // Step 1 ➡️ Step 2 Selection Transition
+    function selectFaction(arch) {
+      selectedFaction = arch;
+
+      // Update banner details in Step 2 (Keep creature form secret until hatched!)
+      bannerIcon.textContent = arch.icon;
+      bannerTitle.textContent = arch.name;
+      bannerPet.textContent = `共鳴願景：${arch.shortName} ｜ 專屬幻獸沉睡中 ✦`;
+
+      // User requirement: 悠哉享樂跟極度躺平，按下去的時候，寶箱要變成寶箱怪(有讓使用者有感)，其他選項則維持正常的寶箱。
+      if (arch.id === 'rest' || arch.id === 'sloth') {
+        setChestMode('mimic', true);
+      } else {
+        setChestMode('normal', true);
+        playCelestialSound();
+      }
+
+      updateFactionUI();
+
+      // Smooth switch to Step 2
+      viewStep1.style.display = 'none';
+      viewStep2.style.display = 'block';
+      viewStep2.classList.remove('fade-enter');
+      void viewStep2.offsetWidth; // Force CSS reflow
+      viewStep2.classList.add('fade-enter');
+    }
+
+    // Step 2 ➡️ Step 1 Back Button
+    backToStep1Btn.addEventListener('click', () => {
+      viewStep2.style.display = 'none';
+      viewStep1.style.display = 'block';
+      setChestMode('normal', false);
+      viewStep1.classList.remove('fade-enter');
+      void viewStep1.offsetWidth; // Force CSS reflow
+      viewStep1.classList.add('fade-enter');
+    });
+
+    // Update dynamic inspiration ideas and placeholder in Step 2
+    function updateFactionUI() {
+      dreamInput.placeholder = selectedFaction.placeholder;
+      dynamicChipsContainer.innerHTML = '';
+
+      selectedFaction.ideas.forEach(ideaText => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'idea-chip';
+        btn.innerHTML = `<span class="idea-chip-prefix">✦</span><span>${ideaText}</span>`;
+        btn.addEventListener('click', () => {
+          dreamInput.value = ideaText;
+          dreamInput.dispatchEvent(new Event('input'));
+          dreamInput.focus();
+        });
+        dynamicChipsContainer.appendChild(btn);
+      });
+    }
+
+    dreamInput.addEventListener('input', () => {
+      const len = dreamInput.value.length;
+      charCounter.textContent = `${len} / 120`;
+      charCounter.style.color = len > 100 ? '#f39c12' : '#9aa8be';
+    });
+
+    function showToast(msg) {
+      toastElem.textContent = msg;
+      toastElem.classList.add('show');
+      setTimeout(() => {
+        toastElem.classList.remove('show');
+      }, 2800);
+    }
+
+    function executeDeposit() {
+      if (isProcessing) return;
+
+      let text = dreamInput.value.trim();
+      // If student left it blank, auto-fill with selected faction's top idea
+      if (!text) {
+        text = selectedFaction.ideas[0];
+        dreamInput.value = text;
+        dreamInput.dispatchEvent(new Event('input'));
+      }
+
+      isProcessing = true;
+      depositBtn.disabled = true;
+      currentDreamText = text;
+      currentSeed = hashString(text);
+
+      // Archetype is 100% locked to the chosen faction!
+      currentArchetype = selectedFaction;
+
+      // Automatically evaluate dream mood based on text (surprising blind result!)
+      currentMood = judgeDreamMood(currentDreamText, currentArchetype);
+
+      // Deterministic ID (e.g. #GOLD-8201)
+      const coordNumber = (currentSeed % 9000) + 1000;
+      currentDreamId = `ARCHIVE: ${currentArchetype.prefix}${coordNumber}`;
+
+      // Render Procedural Vector Slime SVG with automatically detected mood
+      currentSvgCode = generateSlimeSVG(currentArchetype, currentSeed, currentMood);
+      slimeSvgContainer.innerHTML = currentSvgCode;
+
+      // Sound & Animation (Adaptive to Mimic vs Holy Chest)
+      if (currentChestMode === 'mimic') {
+        playMimicAwakenSound();
+      } else {
+        playCelestialSound();
+      }
+      chestBox.classList.add('rumble');
+
+      setTimeout(() => {
+        chestBox.classList.remove('rumble');
+        chestBox.classList.add('opened');
+        triggerParticleBurst(currentChestMode === 'mimic');
+      }, 400);
+
+      // Update Card Meta
+      cardArchetypeBadge.textContent = currentArchetype.name;
+      cardPetName.textContent = currentArchetype.petName;
+      cardIdText.textContent = currentDreamId;
+      cardQuoteText.textContent = `“ ${currentDreamText} ”`;
+      cardOracleText.textContent = `「${currentArchetype.poem}」`;
+
+      if (cardStateTag) {
+        cardStateTag.textContent = currentMood === 'positive' 
+          ? '✨ 憧憬滿滿・亮晶晶' 
+          : (currentSeed % 2 === 0 ? '😵‍💫 暈眩旋渦・擺爛中' : '💤 厭世死魚眼・極致躺平');
+      }
+
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`;
+      cardTimestamp.textContent = `${dateStr} // PROTOCOL ${currentArchetype.id.toUpperCase()}`;
+
+      setTimeout(() => {
+        stageInput.classList.add('hidden-stage');
+        stageResult.classList.add('visible-stage');
+        depositBtn.disabled = false;
+        isProcessing = false;
+        const moodName = currentMood === 'positive' ? '✨ 亮晶晶' : '😵‍💫 厭世暈眩';
+        showToast(`${moodName}專屬幻獸【${currentArchetype.petName}】已現身！`);
+      }, 1150);
+    }
+
+    depositBtn.addEventListener('click', executeDeposit);
+
+    // Interactive Treasury Chest Click: Shake & Play Gold Coin Jingle!
+    function triggerChestCoinShake() {
+      if (isProcessing || chestBox.classList.contains('opened')) return;
+
+      const innerChest = document.getElementById('chest-inner') || chestBox;
+      innerChest.classList.remove('shake-coin');
+      void innerChest.offsetWidth; // Force CSS reflow for instant re-shake
+      innerChest.classList.add('shake-coin');
+
+      if (currentChestMode === 'mimic') {
+        playMimicAwakenSound();
+      } else {
+        playCoinJingleSound();
+      }
+
+      spawnCoinParticles();
+    }
+
+    function spawnCoinParticles() {
+      const count = 3;
+      const coinChars = ['🪙', '✨', '🪙', '✦'];
+      for (let i = 0; i < count; i++) {
+        const coin = document.createElement('span');
+        coin.className = 'floating-coin';
+        coin.textContent = coinChars[Math.floor(Math.random() * coinChars.length)];
+
+        const offsetX = (Math.random() - 0.5) * 80;
+        const offsetY = (Math.random() - 0.5) * 30 - 15;
+        const tx = (Math.random() - 0.5) * 60;
+        const rot = (Math.random() - 0.5) * 70;
+
+        coin.style.left = `calc(50% + ${offsetX}px)`;
+        coin.style.top = `calc(50% + ${offsetY}px)`;
+        coin.style.setProperty('--tx', `${tx}px`);
+        coin.style.setProperty('--rot', `${rot}deg`);
+
+        chestBox.appendChild(coin);
+        setTimeout(() => coin.remove(), 780);
+      }
+    }
+
+    // Clean up shake animation class on animation end
+    const chestInnerElem = document.getElementById('chest-inner');
+    if (chestInnerElem) {
+      chestInnerElem.addEventListener('animationend', (e) => {
+        if (e.animationName === 'chestCoinShake') {
+          chestInnerElem.classList.remove('shake-coin');
+        }
+      });
+    }
+
+    // Chest Box Click Handler
+    chestBox.addEventListener('click', (e) => {
+      if (isProcessing || chestBox.classList.contains('opened')) return;
+
+      // In Step 1: Click anywhere on the chest -> shake and play coin jingle!
+      if (viewStep1.style.display !== 'none') {
+        triggerChestCoinShake();
+        return;
+      }
+
+      // In Step 2:
+      // Clicking the lock opens the chest and completes deposit
+      if (e.target.closest('#chest-lock-btn')) {
+        executeDeposit();
+      } else {
+        // Clicking the chest body in Step 2 also shakes & jingles
+        triggerChestCoinShake();
+      }
+    });
+
+    // Reset Flow: Back to Step 1
+    resetBtn.addEventListener('click', () => {
+      if (isProcessing) return;
+      stageResult.classList.remove('visible-stage');
+      chestBox.classList.remove('opened');
+      chestBox.classList.remove('rumble');
+      setChestMode('normal', false);
+
+      setTimeout(() => {
+        stageInput.classList.remove('hidden-stage');
+        dreamInput.value = '';
+        dreamInput.dispatchEvent(new Event('input'));
+        
+        // Return to Step 1 View
+        viewStep2.style.display = 'none';
+        viewStep1.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 350);
+    });
+
+    /* ==========================================================================
+       8. HIGH-RES POLAROID COMPOSITING & DOWNLOAD (1200 x 1820)
+       ========================================================================== */
+    function exportCardImage() {
+      const exportCanvas = document.getElementById('export-canvas');
+      const ctx = exportCanvas.getContext('2d');
+
+      const cw = 1200;
+      const ch = 1820;
+      exportCanvas.width = cw;
+      exportCanvas.height = ch;
+
+      // 1. Polaroid Pure White Paper
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, cw, ch);
+
+      ctx.strokeStyle = 'rgba(215, 205, 195, 0.7)';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(1.5, 1.5, cw - 3, ch - 3);
+
+      const imgPadding = 48;
+      const photoWidth = cw - imgPadding * 2; // 1104
+      const photoHeight = 840; // 260px equivalent
+      const photoY = imgPadding;
+
+      // Create an image from the Slime SVG
+      const svgBlob = new Blob([currentSvgCode], { type: 'image/svg+xml;charset=utf-8' });
+      const URLObj = window.URL || window.webkitURL || window;
+      const blobURL = URLObj.createObjectURL(svgBlob);
+      const svgImg = new Image();
+
+      svgImg.onload = () => {
+        // Draw Slime Artwork with rounded corners
+        ctx.save();
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(imgPadding, photoY, photoWidth, photoHeight, 18);
+        } else {
+          ctx.rect(imgPadding, photoY, photoWidth, photoHeight);
+        }
+        ctx.clip();
+        ctx.drawImage(svgImg, imgPadding, photoY, photoWidth, photoHeight);
+        ctx.restore();
+
+        // Border around photo
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.12)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(imgPadding, photoY, photoWidth, photoHeight, 18);
+        } else {
+          ctx.rect(imgPadding, photoY, photoWidth, photoHeight);
+        }
+        ctx.stroke();
+
+        // 3. Card Typography & Meta
+        let curY = photoY + photoHeight + 65;
+
+        // Header row
+        ctx.fillStyle = '#936528';
+        ctx.font = 'bold 30px "SF Mono", Consolas, monospace';
+        ctx.fillText(currentDreamId, imgPadding, curY);
+
+        ctx.fillStyle = '#7d7265';
+        ctx.font = '22px "SF Mono", Consolas, monospace';
+        ctx.textAlign = 'right';
+        const moodBadgeText = currentMood === 'positive' ? '✦ 亮晶晶' : '😵‍💫 厭世暈眩';
+        ctx.fillText(`${currentArchetype.name}  [${moodBadgeText}]`, cw - imgPadding, curY);
+        ctx.textAlign = 'left';
+
+        // Dashed separator
+        curY += 28;
+        ctx.save();
+        ctx.strokeStyle = '#d1c7bd';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([10, 8]);
+        ctx.beginPath();
+        ctx.moveTo(imgPadding, curY);
+        ctx.lineTo(cw - imgPadding, curY);
+        ctx.stroke();
+        ctx.restore();
+
+        // 4. Student's Original Quote
+        curY += 56;
+        ctx.fillStyle = '#1a1a24';
+        ctx.font = 'bold 38px "Times New Roman", "Songti TC", "Noto Serif TC", serif';
+
+        const quoteText = `“ ${currentDreamText} ”`;
+        const maxWidth = cw - imgPadding * 2;
+        const lineHeight = 56;
+        const words = quoteText.split('');
+        let line = '';
+
+        for (let n = 0; n < words.length; n++) {
+          const testLine = line + words[n];
+          const metrics = ctx.measureText(testLine);
+          if (metrics.width > maxWidth && n > 0) {
+            ctx.fillText(line, imgPadding, curY);
+            line = words[n];
+            curY += lineHeight;
+          } else {
+            line = testLine;
+          }
+        }
+        ctx.fillText(line, imgPadding, curY);
+
+        // 5. Poetic Oracle Block
+        curY += 60;
+        const oracleBoxY = curY;
+        const oracleBoxHeight = 135;
+
+        ctx.fillStyle = '#f7f4ee';
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(imgPadding, oracleBoxY, maxWidth, oracleBoxHeight, [0, 16, 16, 0]);
+        } else {
+          ctx.rect(imgPadding, oracleBoxY, maxWidth, oracleBoxHeight);
+        }
+        ctx.fill();
+
+        ctx.fillStyle = '#b5894b';
+        ctx.fillRect(imgPadding, oracleBoxY, 8, oracleBoxHeight);
+
+        ctx.fillStyle = '#8c6d3b';
+        ctx.font = 'bold 22px "SF Mono", Consolas, monospace';
+        ctx.fillText(`✧ 幻獸籤詩 • ${currentArchetype.petName}`, imgPadding + 28, oracleBoxY + 40);
+
+        ctx.fillStyle = '#40362c';
+        ctx.font = 'italic 28px "Times New Roman", "Songti TC", "Noto Serif TC", serif';
+        ctx.fillText(`「${currentArchetype.poem}」`, imgPadding + 28, oracleBoxY + 88);
+
+        // 6. Footer Metadata & Circular Seal Stamp
+        const footerY = ch - 70;
+        ctx.fillStyle = '#9c9184';
+        ctx.font = '22px "SF Mono", Consolas, monospace';
+        ctx.fillText('THE TREASURY BOX ARCHIVE', imgPadding, footerY);
+        ctx.font = '19px "SF Mono", Consolas, monospace';
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`;
+        ctx.fillText(`${dateStr} // SEED VERIFIED #${currentSeed.toString(16).toUpperCase()}`, imgPadding, footerY + 28);
+
+        // Red Ink Collector Seal Stamp
+        ctx.save();
+        const sealX = cw - imgPadding - 70;
+        const sealY = footerY + 6;
+        ctx.translate(sealX, sealY);
+        ctx.rotate(-0.12);
+        ctx.strokeStyle = '#ab4b38';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, 48, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.fillStyle = '#ab4b38';
+        ctx.font = 'bold 15px "SF Mono", Consolas, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('SLIME', 0, -14);
+        ctx.fillText('TREASURY', 0, 4);
+        ctx.fillText('MINT', 0, 22);
+        ctx.restore();
+
+        // Download PNG
+        try {
+          exportCanvas.toBlob(blob => {
+            if (!blob) {
+              showToast('長按上方相紙即可保存圖片 ✦');
+              return;
+            }
+            const url = URLObj.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.download = `TreasuryBox_${currentArchetype.id.toUpperCase()}.png`;
+            a.href = url;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URLObj.revokeObjectURL(url), 1000);
+            showToast('🎉 珍藏幻獸卡片已成功下載！');
+          }, 'image/png');
+        } catch (e) {
+          showToast('長按上方相紙即可直接儲存截圖 ✦');
+        }
+
+        URLObj.revokeObjectURL(blobURL);
+      };
+
+      svgImg.src = blobURL;
+    }
+
+    downloadBtn.addEventListener('click', exportCardImage);
+
+    // Initialize Option A Factions Grid and Inspiration Chips
+    renderFactions();
+
+    // Initial Warm-up Slime Render
+    currentArchetype = selectedFaction;
+    currentSvgCode = generateSlimeSVG(currentArchetype, 9999, currentMood);
+    slimeSvgContainer.innerHTML = currentSvgCode;
+  </script>
+</body>
+</html>
